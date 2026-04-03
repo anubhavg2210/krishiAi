@@ -1,0 +1,56 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary-green: #4CAF50;
+  --color-accent-blue: #2196F3;
+  --color-neutral-bg: #F5F5F5;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-neutral-bg);
+    color: #333333;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+}
+
+@layer utilities {
+  .bg-gradient-premium {
+    background: radial-gradient(circle at 15% 50%, rgba(76, 175, 80, 0.08), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(33, 150, 243, 0.08), transparent 25%),
+                linear-gradient(135deg, #f0fdf4 0%, #e8f5e9 50%, #fefce8 100%);
+  }
+
+  /* Skeuomorphic Button */
+  .btn-skeuomorphic {
+    background: linear-gradient(to bottom, #66bb6a, #43a047);
+    border: 1px solid #2e7d32;
+    box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.4),
+                inset 0 -2px 0 rgba(0, 0, 0, 0.15),
+                0 4px 6px rgba(0, 0, 0, 0.2),
+                0 10px 15px rgba(76, 175, 80, 0.3);
+    text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.2);
+    transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+
+  .btn-skeuomorphic:hover {
+    background: linear-gradient(to bottom, #81c784, #4caf50);
+    box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.5),
+                inset 0 -2px 0 rgba(0, 0, 0, 0.1),
+                0 6px 8px rgba(0, 0, 0, 0.25),
+                0 15px 20px rgba(76, 175, 80, 0.4);
+    transform: translateY(-2px);
+  }
+
+  .btn-skeuomorphic:active {
+    background: linear-gradient(to bottom, #43a047, #388e3c);
+    box-shadow: inset 0 4px 6px rgba(0, 0, 0, 0.2),
+                0 1px 2px rgba(0, 0, 0, 0.1);
+    transform: translateY(2px);
+  }
+
+  /* Grass/Botanical subtle pattern */
+  .bg-botanical-pattern {
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M54.627 0l.83.83-54.627 54.627-.83-.83L54.627 0zM0 54.627l.83-.83 54.627 54.627-.83.83L0 54.627z' fill='%234caf50' fill-opacity='0.03' fill-rule='evenodd'/%3E%3C/svg%3E");
+  }
+}
