@@ -81,3 +81,4 @@ kisan-ai-sahayak/
 - **`pages/`**: The core workflow of the app. A user enters on the **Landing Page**, moves to the **Crop Suggest Form** to securely provide their parameters, and finally views the **Results Page** to gain actionable decisions.
 - **`components/FloatingVoiceAssistant.jsx`**: Provides an accessible, friendly floating helper character for native language support and guidance.
 - **`context/AppContext.jsx`**: Handles shared/global state required anywhere in the application; specifically designed to hold language localization preferences and the district choice seamlessly across routes.
+hello
