@@ -12,6 +12,7 @@ import FloatingVoiceAssistant from "./components/FloatingVoiceAssistant";
 import LandingPage from "./pages/LandingPage";
 import CropSuggestForm from "./pages/CropSuggestForm";
 import ResultsPage from "./pages/ResultsPage";
+import WeatherPage from "./pages/WeatherPage";
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/suggest" element={<CropSuggestForm />} />
           <Route path="/results" element={<ResultsPage />} />
+          <Route path="/weather" element={<WeatherPage />} />
         </Routes>
       </main>
       <Footer />

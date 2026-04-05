@@ -7,7 +7,7 @@ import { useAppContext } from "../../context/AppContext";
 const NAV_LINKS = [
   { name: "Home", path: "/" },
   { name: "Crop AI", path: "/suggest" },
-  { name: "Weather Condition", path: "#weather" },
+  { name: "Weather Condition", path: "/weather" },
   { name: "Mandi News", path: "#mandi" },
   { name: "Farm Health", path: "#health" },
 ];

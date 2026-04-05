@@ -5,13 +5,22 @@ const AppContext = createContext();
 export const AppProvider = ({ children }) => {
   const [language, setLanguage] = useState('English');
   const [district, setDistrict] = useState('Indore');
-  // other global states like theme could go here
+
+  // Live weather data fetched from OpenWeatherMap
+  // null = not yet loaded, object = loaded, 'error' = failed
+  const [weatherData, setWeatherData] = useState(null);
+  const [weatherStatus, setWeatherStatus] = useState('idle'); // 'idle' | 'loading' | 'success' | 'error' | 'no_key'
 
   return (
-    <AppContext.Provider value={{ language, setLanguage, district, setDistrict }}>
+    <AppContext.Provider value={{
+      language, setLanguage,
+      district, setDistrict,
+      weatherData, setWeatherData,
+      weatherStatus, setWeatherStatus,
+    }}>
       {children}
     </AppContext.Provider>
-  )
+  );
 };
 
 export const useAppContext = () => useContext(AppContext);
