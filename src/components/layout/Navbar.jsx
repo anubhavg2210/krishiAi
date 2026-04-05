@@ -8,6 +8,7 @@ const NAV_LINKS = [
   { name: "Home", path: "/" },
   { name: "Crop AI", path: "/suggest" },
   { name: "Weather Condition", path: "/weather" },
+  { name: "Disease Detection", path: "/disease" }, // 👈 ADD THIS
   { name: "Mandi News", path: "#mandi" },
   { name: "Farm Health", path: "#health" },
 ];
