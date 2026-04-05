@@ -13,6 +13,7 @@ import LandingPage from "./pages/LandingPage";
 import CropSuggestForm from "./pages/CropSuggestForm";
 import ResultsPage from "./pages/ResultsPage";
 import WeatherPage from "./pages/WeatherPage";
+import DiseasePage from "./pages/DiseasePage";
 
 function App() {
   return (
@@ -34,6 +35,7 @@ function App() {
           <Route path="/suggest" element={<CropSuggestForm />} />
           <Route path="/results" element={<ResultsPage />} />
           <Route path="/weather" element={<WeatherPage />} />
+          <Route path="/disease" element={<DiseasePage />} />
         </Routes>
       </main>
       <Footer />
