@@ -1,5 +1,10 @@
-fastapi
-uvicorn
-python-multipart
-requests
-python-dotenv
+Your 5 Packages Documented:
+ fastapi - Web API framework
+ uvicorn - Server to run FastAPI
+ python-multipart - Image file upload handling
+ requests - Call external APIs (OpenWeatherMap)
+ python-dotenv - Load API keys securely
+
+Quick Installation Command:
+ cd backend
+ pip install -r requirements.txt
