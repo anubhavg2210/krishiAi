@@ -11,6 +11,10 @@ Follow these steps to run the application locally on your machine.
 ### Prerequisites
 Make sure you have [Node.js](https://nodejs.org/) installed on your computer.
 
+### To Use API
+change the name of `.env.example` to `.env` 
+Here we use open source API keys
+
 ### Installation
 
 1. Open your terminal and ensure you are in the project's root folder:
