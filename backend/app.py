@@ -1,4 +1,5 @@
 from dotenv import load_dotenv
+from services.plant_check import is_plant
 import os
 
 load_dotenv()
@@ -43,20 +44,36 @@ def get_weather():
 @app.post("/analyze")
 async def analyze(file: UploadFile = File(...)):
 
+    # 🔥 STEP 1: Save uploaded image
+    file_path = "temp.jpg"
+    with open(file_path, "wb") as f:
+        f.write(await file.read())
+
+    # 🔥 STEP 2: Check if it's a plant
+    if not is_plant(file_path):
+        return {
+            "error": "❌ This is not a plant image. Please upload a leaf 🌿"
+        }
+
+    # 🔥 STEP 3: Weather logic
     weather = get_weather()
 
     if weather == "hot":
         advice = "गर्मी ज्यादा है, सिंचाई बढ़ाएं और फसल को सूखने से बचाएं।"
-
     elif weather == "cold":
         advice = "ठंड अधिक है, फसल को सुरक्षित रखें और सिंचाई कम करें।"
-
     else:
         advice = "मौसम सामान्य है, नियमित देखभाल करें।"
 
-    return {
+    # 🔥 STEP 4: Dummy disease (replace later with model)
+    disease = {
         "disease": "Early Blight",
-        "confidence": 0.87,
+        "confidence": 0.87
+    }
+
+    return {
+        "disease": disease["disease"],
+        "confidence": disease["confidence"],
         "weather": weather,
         "advice": advice
     }
