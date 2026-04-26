@@ -11,12 +11,16 @@ export const AppProvider = ({ children }) => {
   const [weatherData, setWeatherData] = useState(null);
   const [weatherStatus, setWeatherStatus] = useState('idle'); // 'idle' | 'loading' | 'success' | 'error' | 'no_key'
 
+  // Soil data from CropSuggestForm
+  const [soilData, setSoilData] = useState(null);
+
   return (
     <AppContext.Provider value={{
       language, setLanguage,
       district, setDistrict,
       weatherData, setWeatherData,
       weatherStatus, setWeatherStatus,
+      soilData, setSoilData,
     }}>
       {children}
     </AppContext.Provider>
