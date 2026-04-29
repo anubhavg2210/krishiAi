@@ -45,17 +45,40 @@ function detectSpeechLanguage(text) {
   return /[a-z]/i.test(text) && !/[\u0900-\u097F]/.test(text) ? "en-IN" : "hi-IN";
 }
 
+function stopSpeaking() {
+  if (typeof window !== "undefined" && window.speechSynthesis) {
+    window.speechSynthesis.cancel();
+  }
+}
+
 function speakText(text) {
-  if (typeof window === "undefined" || !window.speechSynthesis || !text) {
+  if (typeof window === "undefined" || !window.speechSynthesis || !text.trim()) {
     return;
   }
+  
+  const voices = window.speechSynthesis.getVoices();
+  const hindiVoices = voices.filter(v => v.lang.includes('hi-IN') || v.lang.includes('hi'));
+  const targetVoice = hindiVoices.find(v => v.name.toLowerCase().includes('male') || v.name.toLowerCase().includes('rishabh')) || hindiVoices[0] || voices[0];
+  
+  const chunks = text.split(/([.!?\n]+)/);
+  let sentences = [];
+  for (let i = 0; i < chunks.length; i += 2) {
+    let combined = ((chunks[i] || "") + (chunks[i + 1] || "")).trim();
+    if (combined) {
+      sentences.push(combined);
+    }
+  }
 
-  window.speechSynthesis.cancel();
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = detectSpeechLanguage(text);
-  utterance.rate = 1;
-  utterance.pitch = 1;
-  window.speechSynthesis.speak(utterance);
+  sentences.forEach((sentence) => {
+    const utterance = new SpeechSynthesisUtterance(sentence);
+    utterance.lang = detectSpeechLanguage(sentence);
+    if (targetVoice) {
+      utterance.voice = targetVoice;
+    }
+    utterance.rate = 0.9;
+    utterance.pitch = 0.8;
+    window.speechSynthesis.speak(utterance);
+  });
 }
 
 function buildContextLine({ pathname, district, weatherData }) {
@@ -67,9 +90,9 @@ function buildContextLine({ pathname, district, weatherData }) {
   return `Current page: ${pageLabel}. ${weatherSummary}`;
 }
 
-async function askGemini(message, context, history) {
+async function askGeminiAndSpeak(message, context, history, onUpdate) {
   if (!GEMINI_API_KEY) {
-    throw new Error("Gemini API key missing hai. Root .env file me VITE_GEMINI_API_KEY set karo.");
+    throw new Error("Gemini API key missing hai.");
   }
 
   const recentHistory = history
@@ -78,7 +101,7 @@ async function askGemini(message, context, history) {
     .join("\n");
 
   const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:streamGenerateContent?key=${GEMINI_API_KEY}`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -89,11 +112,13 @@ async function askGemini(message, context, history) {
             parts: [
               {
                 text: [
-                  "Tum Kisan AI Sahayak ho.",
-                  "Jawab Hindi ya simple Hinglish me do.",
-                  "Answer ko 3 short bullet-style lines ya 1 chhote paragraph me rakho.",
-                  "Kisan ko practical agla step batao.",
-                  "Agar app feature relevant ho to weather, crop suggestion, disease detection, ya results page ka zikr karo.",
+                  "Tum ek behad anubhavi (experienced) desi Kisan ho jo apne kisan bhaiyon ki kheti mein madad karta hai.",
+                  "Tumhari boli aur aawaz ekdum gaon ke samajhdar kisan jaisi honi chahiye. Shuruat hamesha 'Ram Ram bhai', 'Kisan bhai', ya 'Bhaiya' jaise shabdo se karo.",
+                  "Jawab hamesha theth Hindi ya simple Hinglish me do.",
+                  "Bohot important: Jawab sawaal ke hisaab se sateek (accurate) aur puri tarah mukammal (complete) hona chahiye. Agar lambi detail chahiye to step-by-step poora samjhao, aur agar chhota sawaal hai to to-the-point jawab do. Par koi bhi sentence aadhura mat chhodna.",
+                  "Agar kisan krishi (agriculture), fasal, ya beej ke baare me puche toh apna pura anubhav ek kisan ki tarah saajha karo.",
+                  "Diye gaye Context me district aur Live Weather data hai. Mausam ka haal pooche to strictly usi weather data ka use karke batao aur us mausam me kheti ki salah do.",
+                  "Kisan ko practical agla step batao aur relevant hone par apne andaz me crop suggestion ya disease detection page ka zikr karo.",
                   `Context: ${context}`,
                   recentHistory ? `Recent chat:\n${recentHistory}` : "",
                   `User question: ${message}`,
@@ -105,33 +130,67 @@ async function askGemini(message, context, history) {
           },
         ],
         generationConfig: {
-          temperature: 0.5,
-          maxOutputTokens: 260,
+          temperature: 0.6,
+          maxOutputTokens: 2048,
         },
       }),
     },
   );
 
-  const data = await response.json();
-
   if (!response.ok) {
-    const errorMessage =
-      data?.error?.message || "Gemini se response nahi aaya. API key aur quota check karo.";
-    throw new Error(errorMessage);
+    throw new Error("Gemini API error ya quota limit.");
   }
 
-  const reply =
-    data?.candidates?.[0]?.content?.parts
-      ?.map((part) => part.text)
-      .filter(Boolean)
-      .join(" ")
-      .trim() || "";
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let fullText = "";
+  let buffer = "";
 
-  if (!reply) {
+  stopSpeaking(); // Clear old audio
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    
+    const chunk = decoder.decode(value, { stream: true });
+    
+    // Extract text from stream chunk safely
+    const regex = /"text":\s*"((?:[^"\\]|\\.)*)"/g;
+    let match;
+    while ((match = regex.exec(chunk)) !== null) {
+       let rawStr = match[1];
+       let parsedStr = rawStr.replace(/\\n/g, '\n').replace(/\\"/g, '"');
+       
+       fullText += parsedStr;
+       buffer += parsedStr;
+       onUpdate(fullText);
+
+       // Dispatch to TTS queue immediately if we hit sentence boundaries
+       if (/[.!?\n]/.test(buffer)) {
+          let parts = buffer.split(/([.!?\n]+)/);
+          while (parts.length > 2) {
+             let sentence = parts.shift();
+             let punct = parts.shift();
+             let combined = (sentence + punct).trim();
+             if (combined) {
+                // Speak the chunk using the browser queue
+                speakText(combined);
+             }
+          }
+          buffer = parts.join(""); 
+       }
+    }
+  }
+
+  if (buffer.trim()) {
+     speakText(buffer.trim());
+  }
+
+  if (!fullText) {
     throw new Error("Gemini ne empty response diya.");
   }
 
-  return reply;
+  return fullText;
 }
 
 function getIntent(message) {
@@ -248,6 +307,8 @@ function AssistantPanel({ location, district, weatherData }) {
     });
   }, [messages, isListening, heardText]);
 
+  // Removed auto-mic start behavior as requested.
+
   useEffect(() => {
     if (!SpeechRecognition) {
       return undefined;
@@ -281,10 +342,14 @@ function AssistantPanel({ location, district, weatherData }) {
 
     recognition.onerror = (event) => {
       setIsListening(false);
+      if (event.error === "no-speech") {
+        setError("Aapne kuch bola nahi. Kripya dobara mic dabayein aur bolein.");
+        return;
+      }
       setError(
         event.error === "not-allowed"
           ? "Mic permission allow karo."
-          : "Voice input abhi sahi se kaam nahi kar raha.",
+          : `Voice input error: ${event.error}. Mic check karein.`,
       );
     };
 
@@ -318,19 +383,33 @@ function AssistantPanel({ location, district, weatherData }) {
 
     try {
       const localReply = resolveLocalAction(message, navigate, district, location.pathname);
-      const nextReply = localReply || (await askGemini(message, contextLine, historyWithUser));
-      const assistantMessage = createAssistantMessage(nextReply);
-
-      setMessages((current) => [...current, assistantMessage]);
-      speakText(nextReply);
+      
+      if (localReply) {
+         setMessages((current) => [...current, createAssistantMessage(localReply)]);
+         speakText(localReply);
+         setIsLoading(false);
+      } else {
+         const assistantMessageId = `${Date.now()}-assistant`;
+         setMessages((current) => [...current, { role: "assistant", text: "", id: assistantMessageId }]);
+         
+         await askGeminiAndSpeak(message, contextLine, historyWithUser, (partialText) => {
+            setMessages((current) => 
+               current.map((m) => m.id === assistantMessageId ? { ...m, text: partialText } : m)
+            );
+            // Hide loading indicator as soon as we start getting stream chunks
+            setIsLoading(false);
+         });
+      }
     } catch (err) {
       setError(err.message || "Assistant abhi jawab nahi de pa raha.");
-    } finally {
       setIsLoading(false);
     }
   }
 
   function handleMicClick() {
+    // Unlock audio for TTS
+    new Audio("data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA").play().catch(() => {});
+
     if (!recognitionRef.current) {
       setError("Is browser me voice recognition support nahi hai. Type karke pucho.");
       return;
@@ -355,6 +434,8 @@ function AssistantPanel({ location, district, weatherData }) {
 
   function handleSubmit(event) {
     event.preventDefault();
+    // Unlock audio for asynchronous TTS
+    new Audio("data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA").play().catch(() => {});
     handleAsk(query);
   }
 
@@ -433,7 +514,7 @@ function AssistantPanel({ location, district, weatherData }) {
                     {message.role === "assistant" ? <Bot size={13} /> : <Send size={13} />}
                     {message.role === "assistant" ? "Kisan AI" : "You"}
                   </div>
-                  <p>{message.text}</p>
+                  <p className="whitespace-pre-wrap">{message.text}</p>
                 </div>
               </motion.div>
             ))}
