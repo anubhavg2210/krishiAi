@@ -9,6 +9,7 @@ const NAV_LINKS = [
   { name: "Crop AI", path: "/suggest" },
   { name: "Weather Condition", path: "/weather" },
   { name: "Disease Detection", path: "/disease" },
+  { name: "Smart Timeline", path: "/timeline" },
   { name: "AI Voice Assistant", path: "/assistant" },
   { name: "Farm Health", path: "#health" },
 ];

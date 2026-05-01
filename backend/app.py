@@ -8,6 +8,28 @@ from PIL import Image
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras.applications.mobilenet_v2 import preprocess_input, decode_predictions
+from fastapi import Body
+from weather_engine import run_engine
+from fastapi import Form
+
+from pydantic import BaseModel
+from typing import List, Optional
+
+class WeatherDay(BaseModel):
+    day: str
+    weather: str
+    temperature: float
+    humidity: float
+    rain_probability: float
+
+class SoilData(BaseModel):
+    moisture: Optional[float] = None
+    nitrogen: Optional[str] = None
+
+class TimelineRequest(BaseModel):
+    stage: str
+    weather_data: List[WeatherDay]
+    soil: Optional[SoilData] = None
 
 load_dotenv()
 
@@ -15,9 +37,16 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "http://localhost:5173",
+        "http://localhost:3000",
+        "http://127.0.0.1:5173",
+        "http://127.0.0.1:3000",
+        # Add production URLs here when deploying
+        # "https://yourdomain.com",
+    ],
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
@@ -245,4 +274,30 @@ async def analyze(file: UploadFile = File(...)):
         "advice": " ".join(disease_data["treatment"]),
         "diagnosisMode": "AI-assisted mock",
         "note": "Prediction based on visual features using pretrained model (demo version)",
+    }
+
+@app.post("/smart-timeline")
+def smart_timeline(data: TimelineRequest):
+    return run_engine(
+        data.stage,
+        [d.dict() for d in data.weather_data],
+        data.soil.dict() if data.soil else None
+    )
+
+@app.post("/full-analysis")
+async def full_analysis(file: UploadFile = File(...), stage: str = Form(...)):
+    
+    result = await analyze(file)
+
+    weather_data = [
+        {"day": "Mon", "weather": "Rain", "temperature": 32, "humidity": 85, "rain_probability": 70},
+        {"day": "Tue", "weather": "Sunny", "temperature": 36, "humidity": 60, "rain_probability": 10},
+    ]
+
+    timeline_result = run_engine(stage, weather_data)
+
+    return {
+        "disease_analysis": result,
+        "timeline": timeline_result["timeline"],
+        "alerts": timeline_result["alerts"]
     }

@@ -2,6 +2,7 @@
 .env
 .env.local
 .env.*.local
+.env.production
 
 # Logs
 logs
@@ -12,12 +13,26 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
+# Dependencies - Frontend
+node_modules/
+frontend/node_modules/
+dist/
+dist-ssr/
 *.local
 
-# Editor directories and files
+# Dependencies - Backend
+backend/__pycache__/
+backend/.venv/
+backend/venv/
+.venv/
+venv/
+*.pyc
+*.pyo
+__pycache__/
+*.egg-info/
+.Python
+
+# IDE & Editor
 .vscode/*
 !.vscode/extensions.json
 .idea
@@ -27,5 +42,28 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-frontend/node_modules/
-backend/__pycache__/
+
+# OS
+Thumbs.db
+.AppleDouble
+.LSOverride
+
+# Test coverage
+coverage/
+.coverage
+
+# Optional npm cache directory
+.npm
+
+# Optional REPL history
+.node_repl_history
+
+# Build outputs
+build/
+out/
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+~*

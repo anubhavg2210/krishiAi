@@ -53,6 +53,21 @@ const features = [
     ]
   },
   {
+  id: 'timeline',
+  pill: 'AI Farming Planner',
+  titleTop: 'SMART TIMELINE',
+  titleBottom: 'PLAN SMARTER',
+  description: 'Generate weather-based farming schedules, irrigation planning, and proactive crop alerts using AI-powered agricultural logic.',
+  bgImage: "https://images.unsplash.com/photo-1500937386664-56d1dfef3854?q=80&w=2000&auto=format&fit=crop",
+  primaryLink: '/timeline',
+  primaryLinkText: 'GENERATE TIMELINE',
+  miniCards: [
+    { icon: CloudRain, title: 'RAIN ALERTS', desc: 'Avoid irrigation before rainfall' },
+    { icon: ThermometerSun, title: 'HEAT WARNINGS', desc: 'Protect crops during heat stress' },
+    { icon: LineChart, title: 'SMART ACTIONS', desc: 'Daily farming recommendations' }
+  ]
+},
+  {
     id: 'assistant',
     pill: '24/7 Availability',
     titleTop: 'VOICE ASSISTANT',

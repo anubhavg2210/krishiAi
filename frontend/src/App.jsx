@@ -15,6 +15,7 @@ import ResultsPage from "./pages/ResultsPage";
 import WeatherPage from "./pages/WeatherPage";
 import DiseasePage from "./pages/DiseasePage";
 import VoiceAssistantPage from "./pages/VoiceAssistantPage";
+import TimelinePage from "./pages/TimelinePage";
 
 function App() {
   return (
@@ -37,6 +38,7 @@ function App() {
           <Route path="/weather" element={<WeatherPage />} />
           <Route path="/disease" element={<DiseasePage />} />
           <Route path="/assistant" element={<VoiceAssistantPage />} />
+          <Route path="/timeline" element={<TimelinePage />} />
         </Routes>
       </main>
       <Footer />
