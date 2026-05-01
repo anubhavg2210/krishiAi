@@ -6,12 +6,14 @@ import { useAppContext } from "../../context/AppContext";
 
 const NAV_LINKS = [
   { name: "Home", path: "/" },
+  { name: "Dashboard", path: "/dashboard" },
+  { name: "Smart Timeline", path: "/timeline" },
   { name: "Crop AI", path: "/suggest" },
+  { name: "Seed Advisor", path: "/seed-advisor" },
   { name: "Weather Condition", path: "/weather" },
   { name: "Disease Detection", path: "/disease" },
   { name: "Smart Timeline", path: "/timeline" },
   { name: "AI Voice Assistant", path: "/assistant" },
-  { name: "Farm Health", path: "#health" },
 ];
 
 const LANGUAGES = ["English", "Hindi", "Malvi", "Bundeli", "Bagheli", "Nimadi"];

@@ -1,0 +1,11 @@
+<<<<<<< HEAD
+=======
+fastapi
+uvicorn
+python-multipart
+requests
+python-dotenv
+Pillow
+numpy
+tensorflow
+>>>>>>> 76e81efe (Clean repo and added new features)

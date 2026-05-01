@@ -1,231 +1,158 @@
-import { useState, useEffect } from "react";
-import { useAppContext } from "../context/AppContext";
-import { Cloud, AlertCircle, Loader2, CheckCircle, AlertTriangle, Lightbulb } from "lucide-react";
+import { useState } from "react";
+import { Calendar, CloudRain, Sun, Leaf, Droplets, AlertTriangle, ShieldCheck } from "lucide-react";
 
 export default function TimelinePage() {
-  const { district, weatherData, soilData } = useAppContext();
-  const [result, setResult] = useState(null);
-  const [stage, setStage] = useState("vegetative");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+    const [result, setResult] = useState(null);
+    const [stage, setStage] = useState("vegetative");
+    const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    // If no soil data, user should go to /suggest first
-    if (!soilData) {
-      setError("Please enter soil data first by visiting the Crop Suggestion page.");
-    }
-  }, [soilData]);
+    const handleSubmit = async () => {
+        setLoading(true);
+        const payload = {
+            stage,
+            weather_data: [
+                { day: "Monday", weather: "Rain", temperature: 31, humidity: 85, rain_probability: 70 },
+                { day: "Tuesday", weather: "Sunny", temperature: 36, humidity: 60, rain_probability: 10 },
+                { day: "Wednesday", weather: "Cloudy", temperature: 28, humidity: 75, rain_probability: 40 },
+                { day: "Thursday", weather: "Sunny", temperature: 33, humidity: 50, rain_probability: 0 },
+                { day: "Friday", weather: "Rain", temperature: 29, humidity: 90, rain_probability: 80 },
+                { day: "Saturday", weather: "Sunny", temperature: 30, humidity: 65, rain_probability: 20 },
+                { day: "Sunday", weather: "Clear", temperature: 31, humidity: 55, rain_probability: 5 },
+            ],
+        };
 
-  const handleSubmit = async () => {
-    if (!weatherData) {
-      setError("Weather data not available. Please select a district first.");
-      return;
-    }
-
-    if (!soilData) {
-      setError("Soil data required. Please visit Crop Suggestion page first.");
-      return;
-    }
-
-    // Convert weather data to expected format
-    const formattedWeatherData = [
-      {
-        day: "Day 1",
-        weather: weatherData.description || "Unknown",
-        temperature: weatherData.temp || 25,
-        humidity: weatherData.humidity || 50,
-        rain_probability: 0,
-      },
-      {
-        day: "Day 2",
-        weather: "Forecast",
-        temperature: weatherData.temp + 2 || 27,
-        humidity: weatherData.humidity - 5 || 45,
-        rain_probability: 10,
-      },
-      {
-        day: "Day 3",
-        weather: "Forecast",
-        temperature: weatherData.temp + 1 || 26,
-        humidity: weatherData.humidity || 50,
-        rain_probability: 5,
-      },
-    ];
-
-    const payload = {
-      stage,
-      weather_data: formattedWeatherData,
-      soil: {
-        moisture: 50,
-        nitrogen: soilData.N > 60 ? "high" : soilData.N > 40 ? "normal" : "low",
-      },
+        try {
+            const res = await fetch("http://127.0.0.1:8000/smart-timeline", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+            });
+            const data = await res.json();
+            setResult(data);
+        } catch (error) {
+            console.error(error);
+        }
+        setLoading(false);
     };
 
-    setLoading(true);
-    setError("");
+    const getRiskColor = (risk) => {
+        if (risk === "High") return "bg-red-100 text-red-700 border-red-200";
+        if (risk === "Medium") return "bg-orange-100 text-orange-700 border-orange-200";
+        return "bg-green-100 text-green-700 border-green-200";
+    };
 
-    try {
-      const apiUrl = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
-      const res = await fetch(`${apiUrl}/smart-timeline`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
+    const getWeatherIcon = (weather) => {
+        if (weather.includes("Rain")) return <CloudRain className="text-blue-500" />;
+        if (weather.includes("Sun") || weather.includes("Clear")) return <Sun className="text-yellow-500" />;
+        return <Droplets className="text-gray-500" />;
+    };
 
-      if (!res.ok) {
-        throw new Error(`Backend error: ${res.status}`);
-      }
+    return (
+        <div className="max-w-6xl mx-auto space-y-8 animate-in fade-in zoom-in duration-500">
+            {/* Header */}
+            <div className="text-center space-y-4 pt-4">
+                <h1 className="text-4xl md:text-5xl font-black text-gray-900 tracking-tight">
+                    Smart Farming <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#4CAF50] to-teal-500">Timeline</span>
+                </h1>
+                <p className="text-lg text-gray-600 max-w-2xl mx-auto font-medium">
+                    Plan your irrigation, fertilizer, and pesticide schedule based on 7-day weather forecasting and your crop's current stage.
+                </p>
+            </div>
 
-      const data = await res.json();
-      setResult(data);
-    } catch (err) {
-      setError(`Failed to generate timeline: ${err.message}`);
-      setResult(null);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <div className="w-full max-w-6xl mx-auto pb-12">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-4xl font-extrabold text-[#1a4a38]">🌾 Smart Farming Timeline</h1>
-        <p className="mt-2 max-w-3xl text-lg text-slate-600">
-          Generate weather-based farming schedules with AI-powered irrigation planning and crop stage alerts.
-        </p>
-      </div>
-
-      {/* Controls Section */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 mb-8 shadow-sm">
-        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-end">
-          <div className="flex-1">
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Crop Stage
-            </label>
-            <select
-              value={stage}
-              onChange={(e) => setStage(e.target.value)}
-              className="w-full px-4 py-2.5 border border-slate-200 rounded-lg bg-white font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#4CAF50]"
-            >
-              <option value="seed">🌱 Seed</option>
-              <option value="vegetative">🌿 Vegetative (Growth)</option>
-              <option value="flowering">🌸 Flowering</option>
-              <option value="harvesting">✂️ Harvesting</option>
-            </select>
-          </div>
-
-          <div className="text-sm text-slate-600">
-            <p className="font-medium">District: <span className="text-[#4CAF50] font-bold">{district}</span></p>
-            <p className="font-medium mt-1">Soil N: <span className="text-[#4CAF50] font-bold">{soilData?.N || "—"}</span></p>
-          </div>
-
-          <button
-            onClick={handleSubmit}
-            disabled={loading || !soilData}
-            className="px-6 py-2.5 bg-[#1a4a38] hover:bg-[#0f2e26] text-white font-bold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 whitespace-nowrap"
-          >
-            {loading ? (
-              <>
-                <Loader2 size={18} className="animate-spin" />
-                Generating...
-              </>
-            ) : (
-              "Generate Timeline"
-            )}
-          </button>
-        </div>
-
-        {error && (
-          <div className="mt-4 p-4 rounded-lg bg-red-50 border border-red-200 flex gap-3">
-            <AlertCircle size={20} className="text-red-600 flex-shrink-0 mt-0.5" />
-            <p className="text-red-700 font-medium">{error}</p>
-          </div>
-        )}
-      </div>
-
-      {/* Results */}
-      {result && (
-        <div className="space-y-8">
-          {/* Timeline Section */}
-          <div>
-            <h2 className="text-2xl font-extrabold text-gray-900 mb-4 flex items-center gap-2">
-              📅 <span>Farming Schedule</span>
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {result.timeline?.map((item, index) => (
-                <div
-                  key={index}
-                  className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm hover:shadow-md transition-shadow"
-                >
-                  <div className="flex items-start justify-between mb-3">
-                    <h3 className="text-lg font-bold text-gray-900">{item.day}</h3>
-                    <span
-                      className={`px-3 py-1 rounded-lg text-xs font-bold ${
-                        item.risk === "Low"
-                          ? "bg-green-100 text-green-700"
-                          : item.risk === "Medium"
-                          ? "bg-yellow-100 text-yellow-700"
-                          : "bg-red-100 text-red-700"
-                      }`}
+            {/* Input Form */}
+            <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 max-w-2xl mx-auto flex flex-col sm:flex-row gap-4 items-center justify-between">
+                <div className="w-full sm:w-2/3">
+                    <label className="text-sm font-semibold text-gray-700 flex items-center gap-2 mb-2">
+                        <Leaf size={16} className="text-green-500" /> Current Crop Stage
+                    </label>
+                    <select
+                        value={stage}
+                        onChange={(e) => setStage(e.target.value)}
+                        className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm font-medium focus:ring-2 focus:ring-[#4CAF50] outline-none transition-all"
                     >
-                      {item.risk} Risk
-                    </span>
-                  </div>
-
-                  <div className="space-y-2 text-sm">
-                    <div>
-                      <p className="text-slate-600 font-medium">Weather</p>
-                      <p className="text-gray-900 font-semibold">{item.weather}</p>
-                    </div>
-                    <div>
-                      <p className="text-slate-600 font-medium">Recommended Action</p>
-                      <p className="text-gray-900 font-semibold">{item.action}</p>
-                    </div>
-                  </div>
+                        <option value="seed">Seedling Stage</option>
+                        <option value="vegetative">Vegetative Stage</option>
+                        <option value="flowering">Flowering Stage</option>
+                        <option value="harvesting">Harvesting Stage</option>
+                    </select>
                 </div>
-              ))}
-            </div>
-          </div>
 
-          {/* Alerts Section */}
-          {result.alerts?.length > 0 && (
-            <div>
-              <h2 className="text-2xl font-extrabold text-gray-900 mb-4 flex items-center gap-2">
-                🚨 <span>Critical Alerts</span>
-              </h2>
-              <div className="space-y-3">
-                {result.alerts.map((alert, index) => (
-                  <div
-                    key={index}
-                    className="rounded-2xl border-l-4 border-l-red-500 bg-red-50 p-5 flex gap-4"
-                  >
-                    <AlertTriangle size={24} className="text-red-600 flex-shrink-0 mt-0.5" />
-                    <div>
-                      <h3 className="font-bold text-red-900">{alert.type}</h3>
-                      <p className="text-red-700 mt-1">{alert.message}</p>
-                      <p className="text-red-600 font-medium text-sm mt-2">💡 {alert.action}</p>
+                <button
+                    onClick={handleSubmit}
+                    disabled={loading}
+                    className="w-full sm:w-1/3 mt-6 sm:mt-7 bg-gradient-to-r from-[#4CAF50] to-teal-500 hover:from-[#43A047] hover:to-teal-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2"
+                >
+                    <Calendar size={18} />
+                    {loading ? "Planning..." : "Generate"}
+                </button>
+            </div>
+
+            {/* Results Section */}
+            {result && (
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pt-4">
+                    
+                    {/* Left: Alerts Panel */}
+                    <div className="lg:col-span-4 space-y-4">
+                        <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                            <AlertTriangle className="text-orange-500" /> Active Alerts
+                        </h2>
+                        
+                        {result.alerts.length === 0 ? (
+                            <div className="bg-green-50 border border-green-200 rounded-2xl p-6 text-center">
+                                <ShieldCheck className="mx-auto text-green-500 mb-3" size={32} />
+                                <h3 className="font-bold text-green-800">All Clear!</h3>
+                                <p className="text-sm text-green-600 mt-1">No proactive warnings for the next 7 days.</p>
+                            </div>
+                        ) : (
+                            <div className="space-y-4">
+                                {result.alerts.map((alert, index) => (
+                                    <div key={index} className="bg-orange-50 border-l-4 border-orange-500 rounded-r-2xl p-4 shadow-sm">
+                                        <h3 className="font-bold text-orange-900 flex items-center gap-2">
+                                            {alert.type}
+                                        </h3>
+                                        <p className="text-sm text-orange-800 mt-2 font-medium">{alert.message}</p>
+                                        <p className="text-xs text-orange-600 mt-1 bg-white/50 inline-block px-2 py-1 rounded">Action: {alert.action}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
 
-      {/* Empty State */}
-      {!result && !error && !loading && (
-        <div className="rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 p-12 text-center">
-          <Lightbulb size={48} className="mx-auto text-slate-400 mb-4" />
-          <p className="text-lg font-semibold text-gray-900 mb-2">Generate Your Smart Timeline</p>
-          <p className="text-slate-600 max-w-xl mx-auto">
-            Select a crop stage above and click "Generate Timeline" to see personalized farming recommendations based on current weather and your soil data.
-          </p>
+                    {/* Right: 7-Day Timeline */}
+                    <div className="lg:col-span-8 space-y-4">
+                        <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                            <Calendar className="text-blue-500" /> 7-Day Action Plan
+                        </h2>
+
+                        <div className="space-y-4">
+                            {result.timeline.map((item, index) => (
+                                <div key={index} className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex flex-col md:flex-row gap-4 items-start md:items-center hover:shadow-md transition-all">
+                                    {/* Day & Icon */}
+                                    <div className="flex items-center gap-4 min-w-[150px]">
+                                        <div className="bg-gray-50 p-3 rounded-full shadow-inner">
+                                            {getWeatherIcon(item.weather)}
+                                        </div>
+                                        <div>
+                                            <h3 className="font-bold text-gray-900">{item.day}</h3>
+                                            <p className="text-xs text-gray-500 font-medium">{item.weather}</p>
+                                        </div>
+                                    </div>
+
+                                    {/* Action */}
+                                    <div className="flex-1 bg-gray-50 p-3 rounded-xl border border-gray-100">
+                                        <p className="text-sm text-gray-700 font-medium">{item.action}</p>
+                                    </div>
+
+                                    {/* Risk Badge */}
+                                    <div className={`px-4 py-2 rounded-lg text-xs font-bold border ${getRiskColor(item.risk)}`}>
+                                        {item.risk} Risk
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
-      )}
-    </div>
-  );
+    );
 }

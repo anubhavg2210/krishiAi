@@ -1,11 +1,37 @@
-# Environment / Secrets (API keys go here, never commit!)
+# ======================
+# ENV / SECRETS
+# ======================
 .env
 .env.local
 .env.*.local
 .env.production
 
-# Logs
-logs
+# ======================
+# PYTHON
+# ======================
+venv/
+backend/venv/
+krishiAi/venv/
+__pycache__/
+*/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# ======================
+# NODE / FRONTEND
+# ======================
+node_modules/
+frontend/node_modules/
+dist/
+dist-ssr/
+build/
+*.local
+
+# ======================
+# LOGS
+# ======================
+logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
@@ -13,6 +39,7 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+<<<<<<< HEAD
 # Dependencies - Frontend
 node_modules/
 frontend/node_modules/
@@ -33,14 +60,25 @@ __pycache__/
 .Python
 
 # IDE & Editor
+=======
+# ======================
+# OS / SYSTEM
+# ======================
+.DS_Store
+Thumbs.db
+
+# ======================
+# EDITORS
+# ======================
+>>>>>>> 76e81efe (Clean repo and added new features)
 .vscode/*
 !.vscode/extensions.json
-.idea
-.DS_Store
+.idea/
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
+<<<<<<< HEAD
 *.sw?
 
 # OS
@@ -67,3 +105,6 @@ out/
 *.temp
 *.bak
 ~*
+=======
+*.sw?
+>>>>>>> 76e81efe (Clean repo and added new features)

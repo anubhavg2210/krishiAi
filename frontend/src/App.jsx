@@ -15,7 +15,13 @@ import ResultsPage from "./pages/ResultsPage";
 import WeatherPage from "./pages/WeatherPage";
 import DiseasePage from "./pages/DiseasePage";
 import VoiceAssistantPage from "./pages/VoiceAssistantPage";
+<<<<<<< HEAD
 import TimelinePage from "./pages/TimelinePage";
+=======
+import SeedAdvisorPage from "./pages/SeedAdvisorPage";
+import DashboardPage from "./pages/DashboardPage";
+import TimelinePage from "./pages/Timelinepage";
+>>>>>>> 76e81efe (Clean repo and added new features)
 
 function App() {
   return (
@@ -38,6 +44,11 @@ function App() {
           <Route path="/weather" element={<WeatherPage />} />
           <Route path="/disease" element={<DiseasePage />} />
           <Route path="/assistant" element={<VoiceAssistantPage />} />
+<<<<<<< HEAD
+=======
+          <Route path="/seed-advisor" element={<SeedAdvisorPage />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
+>>>>>>> 76e81efe (Clean repo and added new features)
           <Route path="/timeline" element={<TimelinePage />} />
         </Routes>
       </main>
