@@ -14,18 +14,21 @@ import CropSuggestForm from "./pages/CropSuggestForm";
 import ResultsPage from "./pages/ResultsPage";
 import WeatherPage from "./pages/WeatherPage";
 import DiseasePage from "./pages/DiseasePage";
+import VoiceAssistantPage from "./pages/VoiceAssistantPage";
+import TimelinePage from "./pages/TimelinePage";
+import SeedAdvisorPage from "./pages/SeedAdvisorPage";
+import DashboardPage from "./pages/DashboardPage";
 
 function App() {
   return (
     <div className="min-h-screen flex flex-col w-full relative bg-[#f9fbf9] overflow-hidden z-0">
       
       {/* Modern Gradient Blobs Background */}
-      <div className="fixed top-0 left-0 w-full h-full pointer-events-none -z-10">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-green-400/20 blur-[140px]"></div>
-        <div className="absolute top-[20%] right-[-5%] w-[30%] h-[50%] rounded-full bg-yellow-300/10 blur-[120px]"></div>
-        <div className="absolute bottom-[20%] left-[10%] w-[40%] h-[40%] rounded-full bg-green-200/20 blur-[140px]"></div>
-        <div className="absolute bottom-[-15%] right-[10%] w-[50%] h-[30%] rounded-full bg-green-400/15 blur-[150px]"></div>
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03]"></div>
+      <div className="fixed inset-0 w-full h-full pointer-events-none -z-10 overflow-hidden bg-gradient-premium">
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-emerald-400/20 blur-[120px] animate-blob"></div>
+        <div className="absolute top-[20%] right-[-10%] w-[40%] h-[60%] rounded-full bg-teal-300/15 blur-[130px] animate-blob" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute bottom-[-10%] left-[10%] w-[45%] h-[45%] rounded-full bg-green-300/20 blur-[140px] animate-blob" style={{ animationDelay: '4s' }}></div>
+        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.04] mix-blend-overlay"></div>
       </div>
 
       <Navbar />
@@ -36,6 +39,10 @@ function App() {
           <Route path="/results" element={<ResultsPage />} />
           <Route path="/weather" element={<WeatherPage />} />
           <Route path="/disease" element={<DiseasePage />} />
+          <Route path="/assistant" element={<VoiceAssistantPage />} />
+          <Route path="/seed-advisor" element={<SeedAdvisorPage />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/timeline" element={<TimelinePage />} />
         </Routes>
       </main>
       <Footer />

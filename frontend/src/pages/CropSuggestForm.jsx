@@ -54,7 +54,7 @@ function WeatherSkeleton() {
 // ─── Main Component ──────────────────────────────────────────────────────────
 
 export default function CropSuggestForm() {
-  const { district, setDistrict, setWeatherData, setWeatherStatus } = useAppContext();
+  const { district, setDistrict, setWeatherData, setWeatherStatus, setSoilData } = useAppContext();
   const [soil, setSoil] = useState({ N: 50, P: 40, K: 30, pH: 6.5 });
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -90,10 +90,10 @@ export default function CropSuggestForm() {
     loadWeather(district);
   }, [district, loadWeather]);
 
-  // ── Form submission ──────────────────────────────────────────────────────
   const handleSubmit = (e) => {
     e.preventDefault();
     setLoading(true);
+    setSoilData(soil); // Save input to context
     setTimeout(() => {
       setLoading(false);
       navigate("/results");

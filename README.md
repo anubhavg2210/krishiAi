@@ -12,6 +12,10 @@
   <img src="https://img.shields.io/badge/Hackathon-Project-success" />
 </p>
 
+Kisan AI Sahayak is an interactive, highly responsive AI-powered agricultural tool specifically aimed at empowering farmers in Madhya Pradesh. 
+
+The application consists of a **React-based frontend (Vite)** for a premium user experience and a **Python FastAPI backend** to handle API requests, mock disease analysis, and weather integrations.
+
 ---
 
 ## ✨ Why Krishi AI?
@@ -41,121 +45,115 @@ Farmers often lack timely insights about crop health and weather.
 
 ---
 
+## 🛠️ Quick Start & Setup
+
+Follow these steps to run both the Frontend and Backend locally on your machine.
+
+### Prerequisites
+Make sure you have the following installed on your computer:
+1. **Node.js** (v18+ recommended) - For the frontend
+2. **Python** (v3.9+ recommended) - For the backend
+
+---
+
+### 1. Environment Setup (.env)
+
+Before running the project, you need to configure your environment variables. 
+1. Copy the provided `.env.example` file and rename it to `.env` in the root folder.
+2. Fill in the required API keys inside the `.env` file:
+   - `VITE_GEMINI_API_KEY`: Required for the Frontend AI Voice Assistant (Get it from [Google AI Studio](https://aistudio.google.com/)).
+   - `API_KEY`: Required for the Backend OpenWeatherMap integration (Get it from [OpenWeatherMap](https://openweathermap.org/)).
+
+---
+
+### 2. Frontend Setup (React/Vite)
+
+The frontend is built using React, Vite, and TailwindCSS.
+
+1. Open your terminal and navigate to the frontend folder:
+   ```bash
+   cd frontend
+   ```
+
+2. **Install Frontend Dependencies**:
+   ```bash
+   npm install
+   ```
+
+3. **Run the Frontend Server**:
+   ```bash
+   npm run dev
+   ```
+   Your app will be live at `http://localhost:5173/`.
+
+---
+
+### 3. Backend Setup (FastAPI/Python)
+
+The backend is built with FastAPI and runs on Python to serve API endpoints.
+
+1. Open a **new terminal window** and navigate to the backend folder:
+   ```bash
+   cd backend
+   ```
+
+2. **Create a Virtual Environment** (Highly Recommended):
+   ```bash
+   python -m venv venv
+   # On Windows:
+   venv\Scripts\activate
+   # On Mac/Linux:
+   source venv/bin/activate
+   ```
+
+3. **Install Backend Dependencies**:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Run the Backend Server**:
+   ```bash
+   uvicorn app:app --reload
+   ```
+   Your backend will be live at `http://localhost:8000/`.
+
+---
+
 ## 📁 Project Structure
 
-```id="tree1"
+This project uses a separated frontend-backend architecture for scalability.
+
+```text
 krishiAi/
-├── backend/        # FastAPI (ML + APIs)
-│   ├── app.py
-│   ├── requirements.txt
-│   └── ...
-├── frontend/       # React + Vite UI
-│   ├── public/
-│   ├── src/
-│   ├── package.json
-│   └── ...
-├── README.md
-└── .gitignore
-```
+├── backend/                 # Python FastAPI Backend
+│   ├── app.py               # Main FastAPI server and API endpoints
+│   └── requirements.txt     # Python dependencies list
+│
+└── frontend/                # React Vite Frontend
+    ├── package.json         # Node.js dependencies and scripts
+    ├── index.html           # Core HTML entry point
+    └── src/                 # All React source code (Pages, Components, Context)
+        ├── App.jsx          # Main Router component
+        ├── index.css        # Tailwind global styling
+        ├── components/      # UI Components (FloatingVoiceAssistant, Navbar)
+        └── pages/           # Application views (Landing, Disease, Weather, etc.)
+``` 
 
 ---
 
-## ⚙️ Quick Start
-
-### 1️⃣ Clone
-
-```id="clone1"
-git clone https://github.com/anubhavg2210/krishiAi.git
-cd krishiAi
-```
-
-### 2️⃣ Backend (FastAPI)
-
-```id="be1"
-cd backend
-pip install -r requirements.txt
-uvicorn app:app --reload
-```
-
-➡️ http://127.0.0.1:8000
-
----
-
-### 3️⃣ Frontend (React + Vite)
-
-```id="fe1"
-cd frontend
-npm install
-npm run dev
-```
-
-➡️ http://localhost:5173
-
----
-
-## 🔐 Environment Variables
-
-Create `backend/.env`:
-
-```id="env1"
-OPENWEATHER_API_KEY=your_api_key_here
-```
-
----
-
-## 🧠 How It Works
-
-1. User uploads crop image
-2. Backend predicts disease
-3. Weather API fetches current conditions
-4. Advice engine combines both
-5. Frontend displays results instantly
-
----
-
-## 🛠 Tech Stack
-
-**Frontend**
-
-* React (Vite)
-* Tailwind CSS
-* Framer Motion
-
-**Backend**
-
-* FastAPI
-* Uvicorn
-* Python
-
-**APIs**
-
-* OpenWeatherMap
-
----
-
-## 📸 Screenshots (Add before final submission)
+## 📸 Screenshots
 
 > Replace with your images
 
-```id="ss1"
 ![Home](docs/home.png)
 ![Disease Detection](docs/disease.png)
 ![Results](docs/results.png)
-```
-
----
-
-## 🎯 Hackathon Impact
-
-* 📈 Faster disease identification
-* 🌱 Better crop management
-* 🌍 Data-driven farming decisions
 
 ---
 
 ## 🤝 Contributing
 
-```id="contrib1"
+```bash
 git checkout -b feature/your-feature
 git commit -m "Add feature"
 git push
