@@ -11,12 +11,19 @@
 # ======================
 venv/
 backend/venv/
+backend/.venv/
 krishiAi/venv/
+.venv/
 __pycache__/
 */__pycache__/
+backend/__pycache__/
 *.pyc
 *.pyo
 *.pyd
+*.egg-info/
+.Python
+.coverage
+coverage/
 
 # ======================
 # NODE / FRONTEND
@@ -26,7 +33,9 @@ frontend/node_modules/
 dist/
 dist-ssr/
 build/
+out/
 *.local
+.npm
 
 # ======================
 # LOGS
@@ -39,38 +48,17 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-<<<<<<< HEAD
-# Dependencies - Frontend
-node_modules/
-frontend/node_modules/
-dist/
-dist-ssr/
-*.local
-
-# Dependencies - Backend
-backend/__pycache__/
-backend/.venv/
-backend/venv/
-.venv/
-venv/
-*.pyc
-*.pyo
-__pycache__/
-*.egg-info/
-.Python
-
-# IDE & Editor
-=======
 # ======================
 # OS / SYSTEM
 # ======================
 .DS_Store
 Thumbs.db
+.AppleDouble
+.LSOverride
 
 # ======================
 # EDITORS
 # ======================
->>>>>>> 76e81efe (Clean repo and added new features)
 .vscode/*
 !.vscode/extensions.json
 .idea/
@@ -78,33 +66,14 @@ Thumbs.db
 *.ntvs*
 *.njsproj
 *.sln
-<<<<<<< HEAD
 *.sw?
 
-# OS
-Thumbs.db
-.AppleDouble
-.LSOverride
-
-# Test coverage
-coverage/
-.coverage
-
-# Optional npm cache directory
-.npm
-
-# Optional REPL history
-.node_repl_history
-
-# Build outputs
-build/
-out/
-
-# Temporary files
+# ======================
+# MISC
+# ======================
 *.tmp
 *.temp
 *.bak
 ~*
-=======
-*.sw?
->>>>>>> 76e81efe (Clean repo and added new features)
+.node_repl_history
+temp.jpg
