@@ -6,7 +6,6 @@
 .env.*.local
 .env.production
 
-# ======================
 # PYTHON
 # ======================
 venv/
@@ -17,7 +16,7 @@ krishiAi/venv/
 __pycache__/
 */__pycache__/
 backend/__pycache__/
-*.pyc
+backend/*.pyc
 *.pyo
 *.pyd
 *.egg-info/
