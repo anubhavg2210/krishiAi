@@ -9,7 +9,7 @@ export default function DashboardPage() {
     useEffect(() => {
         const fetchDashboardData = async () => {
             try {
-                const res = await fetch("http://127.0.0.1:8000/dashboard");
+                const res = await fetch("https://krishiai-ynrm.onrender.com/dashboard");
                 const result = await res.json();
                 setData(result);
             } catch (error) {

@@ -362,7 +362,7 @@ cd backend
 uvicorn app:app --reload
 
 # Expected output:
-# INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+# INFO:     Uvicorn running on https://krishiai-ynrm.onrender.com (Press CTRL+C to quit)
 ```
 
 Open browser: `http://localhost:8000/`  

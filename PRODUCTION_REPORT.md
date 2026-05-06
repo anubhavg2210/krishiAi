@@ -136,7 +136,7 @@ export default function TimelinePage() {
   ];
   
   // Uses env var for API URL
-  const apiUrl = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+  const apiUrl = import.meta.env.VITE_API_URL || "https://krishiai-ynrm.onrender.com";
   
   // Proper error handling
   if (!soilData) {
