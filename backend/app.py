@@ -37,20 +37,16 @@ load_dotenv()
 
 app = FastAPI()
 
+from fastapi.middleware.cors import CORSMiddleware
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://localhost:3000",
-        "http://127.0.0.1:5173",
-        "http://127.0.0.1:3000",
-        # Add production URLs here when deploying
-        # "https://yourdomain.com",
-    ],
+    allow_origins=["*"],  # 🔥 THIS FIXES YOUR ISSUE
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 model = tf.keras.applications.MobileNetV2(weights="imagenet")
 
