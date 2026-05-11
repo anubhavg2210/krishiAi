@@ -1,3 +1,14 @@
+fastapi
+uvicorn
+python-multipart
+requests
+python-dotenv
+Pillow
+numpy
+tensorflow
+scikit-learn
+pandas
+joblib
 fastapi>=0.110.0
 uvicorn[standard]>=0.27.0
 python-multipart>=0.0.9
