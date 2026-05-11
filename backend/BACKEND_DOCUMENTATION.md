@@ -1,616 +1,387 @@
-# Kisan AI Sahayak - Backend Documentation
+﻿# Kisan AI Sahayak — Backend Documentation
 
 ## 📋 Table of Contents
 1. [Overview](#overview)
-2. [Requirements & Dependencies](#requirements--dependencies)
-3. [Installation & Setup](#installation--setup)
-4. [Environment Variables](#environment-variables)
-5. [API Endpoints](#api-endpoints)
-6. [Current Implementation](#current-implementation)
-7. [Project Structure](#project-structure)
-8. [Error Handling](#error-handling)
-9. [Troubleshooting](#troubleshooting)
+2. [Quick Start](#quick-start)
+3. [Requirements](#requirements)
+4. [Setup & Installation](#setup--installation)
+5. [Environment Variables](#environment-variables)
+6. [Running the Backend](#running-the-backend)
+7. [API Reference](#api-reference)
+8. [Implementation Notes](#implementation-notes)
+9. [Project Structure](#project-structure)
+10. [Troubleshooting](#troubleshooting)
 
 ---
 
 ## Overview
 
-The **Kisan AI Sahayak** backend is built with **FastAPI**, a modern, fast web framework for building APIs with Python. It provides:
+The backend for **Kisan AI Sahayak** is a FastAPI application that powers crop disease analysis, weather-aware recommendations, crop timeline generation, and farm dashboard data.
 
-- 🌾 Crop analysis and recommendations
-- 🌤️ Real-time weather integration
-- 🔍 Disease detection from crop images
-- 🚜 Agricultural data processing
-- 🌐 CORS-enabled for React frontend connectivity
+Key backend capabilities:
+- Plant image analysis with pretrained MobileNetV2
+- Weather status lookup via OpenWeatherMap
+- Smart timeline and alert generation
+- Demo dashboard and crop recommendation endpoints
+- CORS support for the React frontend
 
-**Architecture:**
-- Framework: FastAPI
-- Server: Uvicorn (ASGI server)
-- Language: Python 3.8+
-- Port: 8000 (default)
-
----
-
-## Requirements & Dependencies
-
-### File: `requirements.txt`
-
-#### 1. **fastapi** ⚡
-**Purpose:** Web framework for building APIs  
-**Version:** Latest (typically 0.100+)  
-**Used For:**
-- Creating HTTP endpoints (@app.get, @app.post)
-- Request/response validation
-- Automatic API documentation (Swagger UI)
-- Async/await support
-
-**Example Usage:**
-```python
-from fastapi import FastAPI
-
-app = FastAPI()
-
-@app.get("/api/endpoint")
-def read_data():
-    return {"message": "Hello"}
-```
+Primary files:
+- `app.py` — FastAPI application and routes
+- `weather_engine.py` — timeline and alert generation logic
+- `services/plant_check.py` — plant image validation helper
+- `requirements.txt` — Python dependency list
 
 ---
 
-#### 2. **uvicorn** 🚀
-**Purpose:** ASGI web server (runs FastAPI)  
-**Version:** Latest (typically 0.23+)  
-**Used For:**
-- Running the FastAPI application
-- Hot-reloading during development
-- Production-ready server
+## Quick Start
 
-**How to Run:**
 ```bash
-# Development with auto-reload
-uvicorn app:app --reload --host 0.0.0.0 --port 8000
-
-# Production (no reload)
-uvicorn app:app --host 0.0.0.0 --port 8000
-```
-
----
-
-#### 3. **python-multipart** 📦
-**Purpose:** Handle multipart/form-data (file uploads)  
-**Version:** Latest  
-**Used For:**
-- Processing file uploads (images)
-- Form data parsing
-- UploadFile handling
-
-**Example Usage in Code:**
-```python
-from fastapi import UploadFile, File
-
-@app.post("/upload")
-async def upload_image(file: UploadFile = File(...)):
-    # Process uploaded image
-    contents = await file.read()
-    return {"filename": file.filename}
-```
-
----
-
-#### 4. **requests** 🔗
-**Purpose:** HTTP library for making API calls  
-**Version:** Latest (typically 2.31+)  
-**Used For:**
-- Fetching weather data from OpenWeatherMap API
-- Making external API requests
-- Handling HTTP responses
-
-**Example Usage in Code:**
-```python
-import requests
-
-API_KEY = "your_api_key"
-url = f"https://api.openweathermap.org/data/2.5/weather?q=Bhopal&appid={API_KEY}"
-
-response = requests.get(url)
-data = response.json()
-temperature = data["main"]["temp"]
-```
-
----
-
-#### 5. **python-dotenv** 🔐
-**Purpose:** Load environment variables from `.env` file  
-**Version:** Latest (typically 1.0+)  
-**Used For:**
-- Storing API keys securely
-- Configuration management
-- Preventing hardcoding of secrets
-
-**How It Works:**
-```python
-from dotenv import load_dotenv
-import os
-
-load_dotenv()  # Load from .env file
-API_KEY = os.getenv("API_KEY")
-```
-
-**Example `.env` file:**
-```
-API_KEY=sk_live_your_openweathermap_api_key_here
-CORS_ORIGINS=http://localhost:5173,http://localhost:3000
-DATABASE_URL=sqlite:///./kisan_ai.db
-```
-
----
-
-## Installation & Setup
-
-### Step 1: Prerequisites
-Ensure you have **Python 3.8+** installed:
-```bash
-python --version
-```
-
-### Step 2: Create Virtual Environment
-```bash
-# Navigate to backend folder
 cd backend
-
-# Create virtual environment
 python -m venv venv
-
-# Activate virtual environment
-# Windows:
 venv\Scripts\activate
-
-# MacOS/Linux:
-source venv/bin/activate
-
-# Verify activation (you should see (venv) in terminal)
-```
-
-### Step 3: Install Dependencies
-```bash
-# Install all packages from requirements.txt
 pip install -r requirements.txt
-
-# Verify installation
-pip list
+uvicorn app:app --reload
 ```
 
-### Step 4: Create `.env` File
+Then open the backend documentation UI:
+
+- Swagger UI: `http://localhost:8000/docs`
+- ReDoc: `http://localhost:8000/redoc`
+
+---
+
+## Requirements
+
+**Python:** 3.8 or higher
+
+**Backend dependencies:**
+- `fastapi`
+- `uvicorn`
+- `python-multipart`
+- `requests`
+- `python-dotenv`
+- `Pillow`
+- `numpy`
+- `tensorflow`
+
+These are listed in `backend/requirements.txt`.
+
+---
+
+## Setup & Installation
+
+### 1. Create a virtual environment
+
 ```bash
-# Create .env in backend/ folder
-# Add your OpenWeatherMap API key
-# Get API key from: https://openweathermap.org/api
+cd backend
+python -m venv venv
+venv\Scripts\activate
 ```
 
-**`.env` Template:**
+### 2. Install dependencies
+
+```bash
+pip install -r requirements.txt
 ```
+
+### 3. Create `.env`
+
+Create `backend/.env` with:
+
+```env
 API_KEY=your_openweathermap_api_key_here
 ```
 
-### Step 5: Run Backend Server
-```bash
-# Development mode (auto-reload)
-uvicorn app:app --reload
+### 4. Run the backend server
 
-# Server runs at: http://localhost:8000/
+```bash
+uvicorn app:app --reload --host 0.0.0.0 --port 8000
 ```
 
-### Step 6: Verify Installation
-Open in browser: `http://localhost:8000/docs` (Swagger UI)
+The backend should now be available at `http://localhost:8000`.
 
 ---
 
 ## Environment Variables
 
-### Required Variables
+### Required
 
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `API_KEY` | OpenWeatherMap API Key | `sk_live_abc123...` |
+| Variable | Description |
+| --- | --- |
+| `API_KEY` | OpenWeatherMap API key for weather lookup |
 
-### Optional Variables
+### Optional
 
 | Variable | Description | Default |
-|----------|-------------|---------|
-| `CORS_ORIGINS` | Allowed frontend URLs | `*` (allow all) |
+| --- | --- | --- |
+| `CORS_ORIGINS` | Allowed frontend origins | `*` |
 | `DATABASE_URL` | Database connection string | `sqlite:///./kisan_ai.db` |
-| `PORT` | Server port | `8000` |
+| `PORT` | Backend port | `8000` |
 
-### How to Set Environment Variables
+### Example `.env`
 
-**Method 1: Using `.env` file (Recommended)**
-```
-# Create backend/.env
-API_KEY=your_key_here
-```
-
-**Method 2: Using terminal (temporary)**
-```bash
-# Windows (PowerShell)
-$env:API_KEY = "your_key_here"
-
-# MacOS/Linux
-export API_KEY="your_key_here"
-```
-
-**Method 3: Using Python directly**
-```python
-import os
-os.environ["API_KEY"] = "your_key_here"
+```env
+API_KEY=your_openweathermap_api_key_here
 ```
 
 ---
 
-## API Endpoints
+## Running the Backend
+
+### Development mode
+
+```bash
+uvicorn app:app --reload
+```
+
+### Production example
+
+```bash
+uvicorn app:app --host 0.0.0.0 --port 8000
+```
+
+### Verify
+
+Open `http://localhost:8000/docs`.
+
+---
+
+## API Reference
 
 ### Base URL
-```
-http://localhost:8000
-```
 
-### 1. **GET `/`** - Health Check
-**Description:** Verify backend is running  
-**Method:** GET  
-**Parameters:** None  
+`http://localhost:8000`
 
-**Request:**
-```bash
-curl http://localhost:8000/
-```
+### 1. Health Check
 
-**Response:**
+- **Endpoint:** `GET /`
+- **Description:** Confirms the backend is running.
+- **Response:**
+
 ```json
 {
-  "message": "Backend Running 🚀"
+  "message": "Backend Running"
 }
 ```
 
----
+### 2. Crop Disease Analysis
 
-### 2. **POST `/analyze`** - Analyze Disease & Get Recommendations
-**Description:** Upload crop image and get disease detection + recommendations  
-**Method:** POST  
-**Parameters:** 
-- `file` (required): Image file (JPG, PNG)
+- **Endpoint:** `POST /analyze`
+- **Description:** Upload a plant image to get disease prediction, weather status, and treatment advice.
+- **Request:** Multipart form-data with `file`.
 
-**Request (using curl):**
 ```bash
 curl -X POST "http://localhost:8000/analyze" \
   -H "accept: application/json" \
-  -F "file=@/path/to/image.jpg"
+  -F "file=@crop_leaf_image.jpg"
 ```
 
-**Request (using Python):**
-```python
-import requests
+- **Response:**
 
-url = "http://localhost:8000/analyze"
-with open("crop_image.jpg", "rb") as f:
-    files = {"file": f}
-    response = requests.post(url, files=files)
-    print(response.json())
-```
-
-**Response (Current):**
 ```json
 {
   "disease": "Early Blight",
-  "confidence": 0.87,
+  "confidence": 0.78,
   "weather": "hot",
-  "advice": "गर्मी ज्यादा है, सिंचाई बढ़ाएं और फसल को सूखने से बचाएं।"
+  "weatherNote": "Mausam garam hai, isliye irrigation aur leaf stress monitoring badhao.",
+  "crop": "General Crop",
+  "symptoms": [
+    "Patton par gol bhure daag dikhte hain.",
+    "Daagon ke aas-paas peela hissa ban sakta hai.",
+    "Neeche ke purane patte pehle affect hote hain."
+  ],
+  "treatment": [
+    "Zyada infected patte turant hata do.",
+    "Copper based ya chlorothalonil fungicide label ke hisaab se spray karo.",
+    "Paudhon ke beech hawa chalne do, overwatering mat karo."
+  ],
+  "prevention": [
+    "Patton par seedha paani dene se bacho.",
+    "Crop rotation rakho, same field me baar-baar same crop mat lagao.",
+    "Subah irrigation karo taaki patte jaldi sukh jayein."
+  ],
+  "advice": "Zyada infected patte turant hata do. Copper based ya chlorothalonil fungicide label ke hisaab se spray karo. Paudhon ke beech hawa chalne do, overwatering mat karo.",
+  "diagnosisMode": "AI-assisted mock",
+  "note": "Prediction based on visual features using pretrained model (demo version)"
 }
 ```
 
-**Weather Conditions & Advice:**
-- `"hot"` (temp > 35°C): Increase irrigation, protect from drying
-- `"cold"` (temp < 20°C): Protect crop, reduce irrigation
-- `"normal"` (20-35°C): Regular maintenance
+- **Errors:**
+  - `400` invalid or non-plant image
+  - `413` payload too large
+  - `500` processing error
+
+### 3. Smart Timeline
+
+- **Endpoint:** `POST /smart-timeline`
+- **Description:** Generates a daily crop timeline and alerts based on weather, stage, and optional soil data.
+- **Request body:** JSON
+
+```json
+{
+  "stage": "vegetative",
+  "weather_data": [
+    {
+      "day": "Monday",
+      "weather": "Sunny",
+      "temperature": 32,
+      "humidity": 65,
+      "rain_probability": 10
+    }
+  ],
+  "soil": {
+    "moisture": 50,
+    "nitrogen": "normal"
+  }
+}
+```
+
+- **Response:**
+
+```json
+{
+  "timeline": [
+    {
+      "day": "Monday",
+      "weather": "Sunny",
+      "risk": "Low",
+      "action": "Apply fertilizer"
+    }
+  ],
+  "alerts": []
+}
+```
+
+### 4. Full Analysis
+
+- **Endpoint:** `POST /full-analysis`
+- **Description:** Runs disease analysis and timeline generation together.
+- **Form fields:** `file` and `stage`
+- **Response:** Contains `disease_analysis`, `timeline`, and `alerts`.
+
+### 5. Dashboard Data
+
+- **Endpoint:** `GET /dashboard`
+- **Description:** Returns demo dashboard metrics used by frontend components.
+- **Response:** Sample farm health, moisture, NPK, water usage, alerts, and chart data.
+
+### 6. Crop Recommendation
+
+- **Endpoint:** `POST /crop-recommendation`
+- **Description:** Recommends crop options from NPK/temperature/humidity/rainfall inputs.
+- **Request body:**
+
+```json
+{
+  "npk": "Balanced",
+  "temp": 28,
+  "humidity": 70,
+  "rainfall": 90
+}
+```
+
+- **Response:** Recommended crops and suitability score.
+
+### 7. Alerts
+
+- **Endpoint:** `GET /alerts`
+- **Description:** Returns current weather and disease warning alerts.
+- **Response:** Array of alert objects.
 
 ---
 
-## Current Implementation
+## Implementation Notes
 
-### File: `app.py`
+### Main backend flow
 
-#### Current Code Structure:
+- `app.py` handles route definitions and request processing.
+- A MobileNetV2 model from `tensorflow.keras.applications` is used for image label prediction.
+- Plant-image validation is performed before disease analysis.
+- Weather is fetched from OpenWeatherMap and categorized as `hot`, `cold`, or `normal`.
+- Disease logic is currently demo-based with hardcoded disease entries in `DISEASE_LIBRARY`.
+
+### Plant validation
+
+- The backend checks the uploaded image against plant-related labels.
+- Non-plant uploads are rejected with a `400` response.
+- If model confidence is low, the image may still pass as plant-like.
+
+### Smart timeline engine
+
+- `weather_engine.py` evaluates each day using temperature, humidity, rain probability, and soil values.
+- Alert generation rules include heavy rain, high temperature, and high humidity.
+- Crop stage influences recommended actions such as fertilizer, irrigation, or spraying.
+
+### CORS configuration
+
+Current development config allows all origins:
+
 ```python
-1. Load environment variables (line 1-3)
-2. Import FastAPI & dependencies (line 4-7)
-3. Initialize FastAPI app (line 8)
-4. Setup CORS middleware (line 10-15)
-5. Define GET / endpoint (line 17-19)
-6. Define get_weather() function (line 20-40)
-7. Define POST /analyze endpoint (line 42-57)
+allow_origins=["*"]
+allow_methods=["*"]
+allow_headers=["*"]
+allow_credentials=False
 ```
 
-#### Key Functions:
-
-**`get_weather()`**
-- Fetches current temperature for Bhopal
-- Classifies weather as: "hot", "cold", or "normal"
-- Has error handling (returns "normal" on failure)
-- Called by `/analyze` endpoint
-
-**`analyze()` - POST endpoint**
-- Accepts image file upload
-- Calls `get_weather()`
-- Returns hardcoded disease prediction (mock)
-- Provides Hindi advice based on weather
+For production, replace `"*"` with the frontend domain(s).
 
 ---
 
 ## Project Structure
 
-```
+```text
 backend/
-├── app.py                      # Main FastAPI application
-├── requirements.txt            # Python dependencies
-├── .env                        # Environment variables (create this)
-├── BACKEND_DOCUMENTATION.md    # This file
-└── models/                     # ML models (to be created)
-    ├── disease_model.h5        # Disease detection model
-    └── crop_recommendation.pkl # Crop suggestion model
+├── BACKEND_DOCUMENTATION.md
+├── app.py
+├── requirements.txt
+├── runtime.txt
+├── services/
+│   └── plant_check.py
+└── weather_engine.py
 ```
 
----
-
-## Error Handling
-
-### Current Error Handling
-```python
-try:
-    # API call
-    res = requests.get(url)
-    data = res.json()
-except:
-    return "normal"  # Fallback value
-```
-
-### Issues to Fix ⚠️
-1. **Bare except clause** - Catches all errors (bad practice)
-2. **No logging** - Errors are silently ignored
-3. **No response validation** - Assumes API response structure
-
-### Recommended Improvements:
-```python
-import logging
-
-logger = logging.getLogger(__name__)
-
-try:
-    API_KEY = os.getenv("API_KEY")
-    if not API_KEY:
-        raise ValueError("API_KEY not set in environment")
-    
-    url = f"https://api.openweathermap.org/data/2.5/weather?q=Bhopal&appid={API_KEY}&units=metric"
-    response = requests.get(url, timeout=5)
-    response.raise_for_status()
-    
-    data = response.json()
-    temperature = data.get("main", {}).get("temp", 25)
-    
-except requests.exceptions.RequestException as e:
-    logger.error(f"Weather API failed: {e}")
-    return "normal"
-except Exception as e:
-    logger.error(f"Unexpected error: {e}")
-    return "normal"
-```
+> Duplicate backend docs have been consolidated into this single canonical documentation file.
 
 ---
 
 ## Troubleshooting
 
-### Issue 1: Port 8000 Already in Use
-**Error:** `Address already in use`
+### 1. Missing API key
 
-**Solution:**
-```bash
-# Use different port
-uvicorn app:app --reload --port 8001
+- Confirm `backend/.env` contains a valid `API_KEY`.
+- If weather requests fail, fallback behavior returns `normal` weather.
 
-# Or kill process using port 8000
-# Windows (PowerShell):
-netstat -ano | findstr :8000
-taskkill /PID <PID> /F
+### 2. Dependency issues
 
-# MacOS/Linux:
-lsof -i :8000
-kill -9 <PID>
-```
+- Activate the virtual environment.
+- Run `pip install -r requirements.txt`.
+- Confirm `tensorflow`, `numpy`, `Pillow`, and `fastapi` are installed.
 
----
+### 3. CORS errors
 
-### Issue 2: API_KEY Not Found
-**Error:** `KeyError: API_KEY` or returns None
+- When using the frontend, ensure the frontend origin is allowed in CORS.
+- For a secure setup, set `CORS_ORIGINS` to the actual frontend URL.
 
-**Solution:**
-1. Verify `.env` file exists in `backend/` folder
-2. Check API key format (should start with valid key)
-3. Restart server after adding `.env`
-4. Test: `python -c "from dotenv import load_dotenv; import os; load_dotenv(); print(os.getenv('API_KEY'))"`
+### 4. API route verification
+
+- Use `http://localhost:8000/docs`.
+- Confirm the following endpoints appear: `/`, `/analyze`, `/smart-timeline`, `/full-analysis`, `/dashboard`, `/crop-recommendation`, `/alerts`.
+
+### 5. Model loading
+
+- `app.py` loads MobileNetV2 at startup.
+- If startup is slow, this is expected for TensorFlow model initialization.
 
 ---
 
-### Issue 3: CORS Errors from Frontend
-**Error:** `Access-Control-Allow-Origin` header missing
+## Validation
 
-**Solution:**
-The CORS middleware is already configured in `app.py`:
-```python
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # Allow all origins
-    allow_credentials=True,
-    allow_methods=["*"],  # Allow all methods
-    allow_headers=["*"],  # Allow all headers
-)
-```
-
-For production, replace `["*"]` with specific URLs:
-```python
-allow_origins=[
-    "http://localhost:5173",
-    "https://yourfrontend.com"
-]
-```
-
----
-
-### Issue 4: File Upload Not Working
-**Error:** `multipart/form-data` parsing fails
-
-**Solution:**
-1. Ensure `python-multipart` is installed: `pip install python-multipart`
-2. Restart server: `uvicorn app:app --reload`
-3. Verify request sends file correctly (use form-data, not JSON)
-
----
-
-### Issue 5: Weather API Returns Error
-**Error:** OpenWeatherMap API returns 401 or 404
-
-**Solution:**
-1. Verify API key is valid at https://openweathermap.org/
-2. Check API key has weather API permission
-3. Verify API key is added to `.env` correctly
-4. Check that Bhopal is correct city name
-
----
-
-## Testing the Backend
-
-### Using Swagger UI (Recommended)
-1. Start server: `uvicorn app:app --reload`
-2. Open: `http://localhost:8000/docs`
-3. Click "Try it out" on any endpoint
-4. Fill parameters and click "Execute"
-
-### Using cURL
-```bash
-# Test GET /
-curl http://localhost:8000/
-
-# Test POST /analyze with image
-curl -X POST "http://localhost:8000/analyze" \
-  -F "file=@crop_image.jpg"
-```
-
-### Using Python
-```python
-import requests
-
-# Test endpoints
-backend_url = "http://localhost:8000"
-
-# Test home
-response = requests.get(f"{backend_url}/")
-print(response.json())
-
-# Test analyze
-with open("crop_image.jpg", "rb") as f:
-    files = {"file": f}
-    response = requests.post(f"{backend_url}/analyze", files=files)
-    print(response.json())
-```
-
----
-
-## Next Steps to Complete Backend
-
-### 1. Implement Real Disease Detection
-```python
-# Load ML model and predict
-import tensorflow as tf
-
-model = tf.keras.models.load_model("models/disease_model.h5")
-prediction = model.predict(image_array)
-disease_name = get_disease_label(prediction)
-```
-
-### 2. Add Crop Recommendation Logic
-```python
-@app.post("/recommendations")
-async def recommend_crops(soil_data: SoilInput):
-    # Analyze soil (N, P, K, pH)
-    # Get weather conditions
-    # Return top 3-5 crop recommendations
-    pass
-```
-
-### 3. Integrate Mandi Prices API
-```python
-@app.get("/mandi/{crop}")
-async def get_mandi_prices(crop: str):
-    # Fetch current prices
-    # Return by district
-    pass
-```
-
-### 4. Add Database Support
-```python
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./kisan_ai.db")
-engine = create_engine(DATABASE_URL)
-SessionLocal = sessionmaker(bind=engine)
-```
-
----
-
-## Deployment Checklist
-
-- [ ] Remove `--reload` flag (use in production)
-- [ ] Replace `allow_origins=["*"]` with specific domains
-- [ ] Set environment variables securely
-- [ ] Use PostgreSQL instead of SQLite
-- [ ] Set up logging and monitoring
-- [ ] Enable HTTPS/SSL
-- [ ] Configure error tracking (Sentry)
-- [ ] Set up CI/CD pipeline
-
----
-
-## Useful Commands
+Use these commands from `backend/`:
 
 ```bash
-# Activate virtual environment
-venv\Scripts\activate  # Windows
-source venv/bin/activate  # MacOS/Linux
-
-# Install requirements
+venv\Scripts\activate
 pip install -r requirements.txt
-
-# Run server with reload
 uvicorn app:app --reload
-
-# Run server on custom port
-uvicorn app:app --port 8001
-
-# Freeze current dependencies
-pip freeze > requirements.txt
-
-# Deactivate virtual environment
-deactivate
 ```
 
----
-
-## Support & Resources
-
-- **FastAPI Docs:** https://fastapi.tiangolo.com/
-- **Uvicorn Docs:** https://www.uvicorn.org/
-- **OpenWeatherMap API:** https://openweathermap.org/api
-- **Python Requests:** https://requests.readthedocs.io/
-
----
-
-**Last Updated:** 2026-04-07  
-**Backend Version:** 1.0.0  
-**Python Version:** 3.8+
+Then test with a browser or curl.

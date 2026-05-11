@@ -54,7 +54,7 @@ function WeatherSkeleton() {
 // ─── Main Component ──────────────────────────────────────────────────────────
 
 export default function CropSuggestForm() {
-  const { district, setDistrict, setWeatherData, setWeatherStatus, setSoilData } = useAppContext();
+  const { district, setDistrict, setWeatherData, setWeatherStatus, setSoilData, t } = useAppContext();
   const [soil, setSoil] = useState({ N: 50, P: 40, K: 30, pH: 6.5 });
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -109,10 +109,10 @@ export default function CropSuggestForm() {
         <div className="flex flex-col items-center text-center gap-3 py-2">
           <KeyRound size={32} className="text-yellow-300" />
           <p className="text-sm font-semibold text-white/90 leading-snug">
-            Add your API key in <code className="bg-white/15 px-1.5 py-0.5 rounded text-xs">.env</code> to see live weather
+            {t("cropForm.addApiKey")} <code className="bg-white/15 px-1.5 py-0.5 rounded text-xs">.env</code> {t("cropForm.seeLiveWeather")}
           </p>
           <p className="text-xs text-green-100">
-            Get a free key at{" "}
+            {t("cropForm.getFreeKey")}{" "}
             <a
               href="https://openweathermap.org/api"
               target="_blank"
@@ -130,12 +130,12 @@ export default function CropSuggestForm() {
       return (
         <div className="flex flex-col items-center text-center gap-3 py-2">
           <AlertTriangle size={30} className="text-yellow-300" />
-          <p className="text-sm font-semibold text-white/90">Could not reach weather service</p>
+          <p className="text-sm font-semibold text-white/90">{t("cropForm.weatherError")}</p>
           <button
             onClick={() => loadWeather(district)}
             className="flex items-center gap-1.5 text-xs bg-white/15 hover:bg-white/25 px-3 py-1.5 rounded-lg transition-colors font-semibold"
           >
-            <RefreshCw size={12} /> Retry
+            <RefreshCw size={12} /> {t("cropForm.retry")}
           </button>
         </div>
       );
@@ -158,25 +158,25 @@ export default function CropSuggestForm() {
           <WeatherStat
             icon={<ThermometerSun size={28} className="text-yellow-300" />}
             value={`${weather.temp}°C`}
-            label={`Feels like ${weather.feelsLike}°C`}
+            label={`${t("cropForm.feelsLike")} ${weather.feelsLike}°C`}
           />
           <div className="h-px bg-white/20 w-full" />
           <WeatherStat
             icon={<Droplets size={26} className="text-blue-200" />}
             value={`${weather.humidity}%`}
-            label="Humidity"
+            label={t("cropForm.humidity")}
           />
           <div className="h-px bg-white/20 w-full" />
           <WeatherStat
             icon={<CloudRain size={26} className="text-blue-100" />}
             value={`${weather.rainfall} mm`}
-            label="Rainfall (last hour)"
+            label={t("cropForm.rainfall")}
           />
           <div className="h-px bg-white/20 w-full" />
           <WeatherStat
             icon={<Wind size={24} className="text-emerald-200" />}
             value={`${weather.windSpeed} km/h`}
-            label="Wind Speed"
+            label={t("cropForm.windSpeed")}
           />
         </div>
       );
@@ -212,9 +212,9 @@ export default function CropSuggestForm() {
   return (
     <div className="max-w-4xl mx-auto w-full">
       <div className="mb-8">
-        <h1 className="text-4xl font-extrabold text-gray-900 mb-2">Crop Recommendation</h1>
+        <h1 className="text-4xl font-extrabold text-gray-900 mb-2">{t("cropForm.title")}</h1>
         <p className="text-lg text-gray-500 font-medium">
-          Enter your soil test details for the most accurate AI suggestions in Madhya Pradesh.
+          {t("cropForm.subtitle")}
         </p>
       </div>
 
@@ -226,7 +226,7 @@ export default function CropSuggestForm() {
           {/* District Selector */}
           <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
             <label className="block text-sm font-bold text-gray-700 uppercase tracking-wide mb-3 flex items-center gap-2">
-              <MapPin size={18} className="text-[#2196F3]" /> Select District
+              <MapPin size={18} className="text-[#2196F3]" /> {t("cropForm.selectDistrict")}
             </label>
             <select
               value={district}
@@ -243,7 +243,7 @@ export default function CropSuggestForm() {
             <div className="absolute top-0 right-0 -mt-10 -mr-10 w-32 h-32 bg-white/10 rounded-full blur-2xl pointer-events-none" />
 
             <h3 className="text-sm font-bold uppercase tracking-wider text-green-100 mb-5 flex justify-between items-center">
-              <span>Live Weather</span>
+              <span>{t("cropForm.liveWeather")}</span>
               <span className="flex items-center gap-1.5">
                 {wxStatus === "loading" && <Loader2 size={12} className="animate-spin" />}
                 {wxStatus === "success" && (
@@ -260,21 +260,21 @@ export default function CropSuggestForm() {
         {/* ── Right Column: Soil Inputs ── */}
         <div className="lg:col-span-2 bg-white rounded-2xl shadow-xl shadow-gray-200/50 border border-gray-100 p-8">
           <div className="flex justify-between items-center mb-8 pb-4 border-b border-gray-100">
-            <h2 className="text-2xl font-extrabold text-gray-900">Soil Condition</h2>
+            <h2 className="text-2xl font-extrabold text-gray-900">{t("cropForm.soilCondition")}</h2>
             <button className="text-sm font-semibold text-[#2196F3] flex items-center gap-1 hover:underline">
-              <Save size={16} /> Auto-saved
+              <Save size={16} /> {t("cropForm.autoSaved")}
             </button>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-10">
             <div className="space-y-8">
-              <SliderField label="Nitrogen (N)"   field="N"   min={0}   max={150} unit="kg/ha" accentColor="#4CAF50" />
-              <SliderField label="Phosphorus (P)" field="P"   min={0}   max={100} unit="kg/ha" accentColor="#4CAF50" />
-              <SliderField label="Potassium (K)"  field="K"   min={0}   max={100} unit="kg/ha" accentColor="#4CAF50" />
+              <SliderField label={t("cropForm.nitrogen")}   field="N"   min={0}   max={150} unit="kg/ha" accentColor="#4CAF50" />
+              <SliderField label={t("cropForm.phosphorus")} field="P"   min={0}   max={100} unit="kg/ha" accentColor="#4CAF50" />
+              <SliderField label={t("cropForm.potassium")}  field="K"   min={0}   max={100} unit="kg/ha" accentColor="#4CAF50" />
 
               <div className="bg-gray-50 p-6 rounded-xl border border-gray-100">
-                <SliderField label="pH Level" field="pH" min={4} max={9} step={0.1} unit="" accentColor="#2196F3" />
-                <p className="text-sm text-gray-500 font-medium mt-3">Neutral soil is 6.5 to 7.0</p>
+                <SliderField label={t("cropForm.phLevel")} field="pH" min={4} max={9} step={0.1} unit="" accentColor="#2196F3" />
+                <p className="text-sm text-gray-500 font-medium mt-3">{t("cropForm.neutralSoil")}</p>
               </div>
             </div>
 
@@ -283,7 +283,7 @@ export default function CropSuggestForm() {
               disabled={loading}
               className="w-full bg-[#4CAF50] hover:bg-[#43a047] text-white py-5 rounded-xl font-bold text-xl shadow-[0_8px_20px_rgb(76,175,80,0.3)] hover:shadow-[0_12px_25px_rgb(76,175,80,0.4)] transition-all flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed"
             >
-              {loading ? <Loader2 className="animate-spin" size={24} /> : "Suggest Crops"}
+              {loading ? <Loader2 className="animate-spin" size={24} /> : t("cropForm.suggest")}
             </button>
           </form>
         </div>

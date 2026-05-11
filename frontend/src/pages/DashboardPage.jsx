@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { Activity, Droplets, Wind, AlertCircle, ThermometerSun, Sprout } from "lucide-react";
+import { useAppContext } from "../context/AppContext";
 
 export default function DashboardPage() {
+    const { t } = useAppContext();
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
 
@@ -36,16 +38,16 @@ export default function DashboardPage() {
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pt-4">
                 <div>
                     <h1 className="text-4xl font-black text-gray-900 tracking-tight">
-                        Farmer <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#4CAF50] to-teal-500">Dashboard</span>
+                        {t("dashboard.titleA")} <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#4CAF50] to-teal-500">{t("dashboard.titleB")}</span>
                     </h1>
-                    <p className="text-gray-600 mt-1 font-medium">Your farm's real-time overview and analytics.</p>
+                    <p className="text-gray-600 mt-1 font-medium">{t("dashboard.subtitle")}</p>
                 </div>
                 <div className="bg-white px-5 py-2.5 rounded-full shadow-sm border border-gray-100 flex items-center gap-3">
                     <span className="relative flex h-3 w-3">
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                       <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
                     </span>
-                    <span className="text-sm font-bold text-gray-700">System Live</span>
+                    <span className="text-sm font-bold text-gray-700">{t("dashboard.systemLive")}</span>
                 </div>
             </div>
 
@@ -56,7 +58,7 @@ export default function DashboardPage() {
                         <Activity size={24} />
                     </div>
                     <div>
-                        <p className="text-sm text-gray-500 font-bold uppercase">Farm Health</p>
+                        <p className="text-sm text-gray-500 font-bold uppercase">{t("dashboard.farmHealth")}</p>
                         <h3 className="text-3xl font-black text-gray-900">{data.farmHealth}%</h3>
                     </div>
                 </div>
@@ -66,7 +68,7 @@ export default function DashboardPage() {
                         <Droplets size={24} />
                     </div>
                     <div>
-                        <p className="text-sm text-gray-500 font-bold uppercase">Water Usage</p>
+                        <p className="text-sm text-gray-500 font-bold uppercase">{t("dashboard.waterUsage")}</p>
                         <h3 className="text-2xl font-black text-gray-900">{data.waterUsage}</h3>
                     </div>
                 </div>
@@ -76,7 +78,7 @@ export default function DashboardPage() {
                         <ThermometerSun size={24} />
                     </div>
                     <div>
-                        <p className="text-sm text-gray-500 font-bold uppercase">Weather</p>
+                        <p className="text-sm text-gray-500 font-bold uppercase">{t("dashboard.weather")}</p>
                         <h3 className="text-lg font-black text-gray-900 leading-tight">{data.weatherSummary}</h3>
                     </div>
                 </div>
@@ -86,7 +88,7 @@ export default function DashboardPage() {
                         <AlertCircle size={24} />
                     </div>
                     <div>
-                        <p className="text-sm text-orange-600 font-bold uppercase">Active Alerts</p>
+                        <p className="text-sm text-orange-600 font-bold uppercase">{t("dashboard.activeAlerts")}</p>
                         <h3 className="text-3xl font-black text-orange-900">{data.activeAlerts}</h3>
                     </div>
                 </div>
@@ -96,7 +98,7 @@ export default function DashboardPage() {
                 {/* Chart Section */}
                 <div className="lg:col-span-2 bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
                     <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-                        <Sprout className="text-green-500" /> Weekly Crop Health Index
+                        <Sprout className="text-green-500" /> {t("dashboard.weeklyHealth")}
                     </h3>
                     <div className="h-72 w-full">
                         <ResponsiveContainer width="100%" height="100%">
@@ -126,27 +128,27 @@ export default function DashboardPage() {
                         <div className="absolute -right-4 -bottom-4 opacity-10">
                             <Wind size={120} />
                         </div>
-                        <h3 className="text-xl font-bold mb-4">Soil Profile</h3>
+                        <h3 className="text-xl font-bold mb-4">{t("dashboard.soilProfile")}</h3>
                         <div className="space-y-4 relative z-10">
                             <div className="bg-white/10 backdrop-blur rounded-xl p-4 border border-white/10">
-                                <p className="text-indigo-200 text-sm font-medium">Moisture Level</p>
+                                <p className="text-indigo-200 text-sm font-medium">{t("dashboard.moisture")}</p>
                                 <p className="text-2xl font-black text-white">{data.soilMoisture}</p>
                             </div>
                             <div className="bg-white/10 backdrop-blur rounded-xl p-4 border border-white/10">
-                                <p className="text-indigo-200 text-sm font-medium">NPK Nutrient Status</p>
+                                <p className="text-indigo-200 text-sm font-medium">{t("dashboard.npk")}</p>
                                 <p className="text-2xl font-black text-white">{data.npkLevel}</p>
                             </div>
                         </div>
                     </div>
 
                     <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-                        <h3 className="text-lg font-bold text-gray-900 mb-4">Quick Actions</h3>
+                        <h3 className="text-lg font-bold text-gray-900 mb-4">{t("dashboard.quickActions")}</h3>
                         <div className="space-y-3">
                             <button onClick={() => window.location.href = "/timeline"} className="w-full bg-gray-50 hover:bg-[#4CAF50] hover:text-white text-gray-700 font-bold py-3 px-4 rounded-xl transition-colors border border-gray-200 hover:border-[#4CAF50] text-left flex justify-between items-center">
-                                View Smart Timeline <span>→</span>
+                                {t("dashboard.timeline")} <span>→</span>
                             </button>
                             <button onClick={() => window.location.href = "/disease"} className="w-full bg-gray-50 hover:bg-[#4CAF50] hover:text-white text-gray-700 font-bold py-3 px-4 rounded-xl transition-colors border border-gray-200 hover:border-[#4CAF50] text-left flex justify-between items-center">
-                                Run Disease Scan <span>→</span>
+                                {t("dashboard.diseaseScan")} <span>→</span>
                             </button>
                         </div>
                     </div>

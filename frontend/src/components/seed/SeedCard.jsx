@@ -1,7 +1,7 @@
 import { Star, ExternalLink, Leaf, Info } from "lucide-react";
 import AntiScamBadge from "./AntiScamBadge";
 
-export default function SeedCard({ seed, onGetRecommendation }) {
+export default function SeedCard({ seed, onGetRecommendation, t = (key) => key }) {
   const handleBuyClick = () => {
     window.open(`https://utpannseeds.in/`, "_blank");
   };
@@ -12,7 +12,7 @@ export default function SeedCard({ seed, onGetRecommendation }) {
       <div className="absolute top-4 left-4 z-10">
         <span className="bg-white/90 backdrop-blur-sm text-gray-800 text-xs font-bold px-3 py-1.5 rounded-full shadow-sm flex items-center gap-1.5">
           <Star size={12} className="text-yellow-500 fill-yellow-500" />
-          {seed.rating} Rating
+          {seed.rating} {t("seedAdvisor.rating")}
         </span>
       </div>
       
@@ -35,11 +35,11 @@ export default function SeedCard({ seed, onGetRecommendation }) {
       <div className="p-5">
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div className="bg-gray-50 rounded-xl p-3">
-            <p className="text-xs text-gray-500 font-medium uppercase tracking-wider mb-1">Price</p>
+            <p className="text-xs text-gray-500 font-medium uppercase tracking-wider mb-1">{t("seedAdvisor.price")}</p>
             <p className="text-sm font-bold text-gray-900">{seed.price}</p>
           </div>
           <div className="bg-green-50 rounded-xl p-3">
-            <p className="text-xs text-green-600 font-medium uppercase tracking-wider mb-1">Expected Yield</p>
+            <p className="text-xs text-green-600 font-medium uppercase tracking-wider mb-1">{t("seedAdvisor.yield")}</p>
             <p className="text-sm font-bold text-green-900">{seed.yield}</p>
           </div>
         </div>
@@ -59,19 +59,19 @@ export default function SeedCard({ seed, onGetRecommendation }) {
             className="flex-1 flex items-center justify-center gap-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 py-3 rounded-xl text-sm font-bold transition-colors"
           >
             <Info size={16} />
-            Why this seed?
+            {t("seedAdvisor.why")}
           </button>
           
           <button 
             onClick={handleBuyClick}
             className="flex-1 flex items-center justify-center gap-2 bg-[#4CAF50] hover:bg-[#43A047] text-white py-3 rounded-xl text-sm font-bold transition-all shadow-sm hover:shadow-md"
           >
-            Buy Now
+            {t("seedAdvisor.buyNow")}
             <ExternalLink size={16} />
           </button>
         </div>
 
-        <AntiScamBadge />
+        <AntiScamBadge t={t} />
       </div>
     </div>
   );

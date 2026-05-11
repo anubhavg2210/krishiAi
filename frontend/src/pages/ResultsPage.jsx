@@ -11,7 +11,7 @@ import { useAppContext } from "../context/AppContext";
 import { inferBestCrop } from "../lib/cropEngine";
 
 export default function ResultsPage() {
-  const { district, soilData } = useAppContext();
+  const { district, soilData, t } = useAppContext();
 
   // If there is no soilData, the user didn't submit the form. Redirect them.
   if (!soilData) {
@@ -27,15 +27,15 @@ export default function ResultsPage() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
         <div>
           <Link to="/suggest" className="text-sm font-bold text-gray-500 hover:text-[#2196F3] flex items-center gap-2 mb-2 transition-colors">
-            <ArrowLeft size={16} /> Try Different Inputs
+            <ArrowLeft size={16} /> {t("results.tryDifferent")}
           </Link>
           <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900">
-            Recommended for <span className="text-[#4CAF50]">{district}</span>
+            {t("results.recommendedFor")} <span className="text-[#4CAF50]">{district}</span>
           </h1>
         </div>
         <div className="flex gap-3 w-full sm:w-auto">
            <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-3 bg-white border-2 border-gray-200 rounded-xl font-bold text-gray-700 hover:bg-gray-50 transition-colors shadow-sm">
-             <Save size={18} /> Save Plan
+             <Save size={18} /> {t("results.savePlan")}
            </button>
            <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-3 bg-[#25D366] hover:bg-[#20b858] text-white rounded-xl font-bold transition-all shadow-sm">
              <Share2 size={18} /> WhatsApp
@@ -56,10 +56,10 @@ export default function ResultsPage() {
           <div className="absolute inset-0 bg-gradient-to-t from-gray-900/90 via-gray-900/40 to-transparent flex flex-col justify-end p-8 md:p-12">
              <div className="flex items-center gap-3 mb-2">
                <span className="bg-[#4CAF50] text-white px-3 py-1.5 rounded-lg text-sm font-bold flex items-center gap-1">
-                 <CheckCircle size={16} /> {crop.matchScore}% Match
+                 <CheckCircle size={16} /> {crop.matchScore}% {t("results.match")}
                </span>
                <span className="bg-white/20 backdrop-blur-md text-white px-3 py-1.5 rounded-lg text-sm font-bold">
-                 High Yield Potential
+                 {t("results.highYield")}
                </span>
              </div>
              <h2 className="text-5xl md:text-6xl font-extrabold text-white">{crop.name} <span className="text-gray-300 font-medium text-3xl ml-2">({crop.hindiName})</span></h2>
@@ -75,9 +75,9 @@ export default function ResultsPage() {
                <div className="w-12 h-12 rounded-2xl bg-green-50 flex items-center justify-center text-[#4CAF50] mb-4 border border-green-100">
                  <Sprout size={24} />
                </div>
-               <h3 className="text-xl font-extrabold text-gray-900">Seed & Fertilizer</h3>
+               <h3 className="text-xl font-extrabold text-gray-900">{t("results.seedFertilizer")}</h3>
                <div className="space-y-3">
-                 <p className="text-gray-600 font-medium"><span className="text-gray-900 font-bold">Seed:</span> {crop.details.seed}</p>
+                 <p className="text-gray-600 font-medium"><span className="text-gray-900 font-bold">{t("results.seed")}:</span> {crop.details.seed}</p>
                  <p className="text-gray-600 font-medium"><span className="text-gray-900 font-bold">NPK:</span> {crop.details.npkText}</p>
                  <p className="text-sm border border-orange-200 bg-orange-50 text-orange-700 p-3 rounded-lg font-semibold mt-2">
                    {crop.details.extraTip}
@@ -90,10 +90,10 @@ export default function ResultsPage() {
                <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-[#2196F3] mb-4 border border-blue-100">
                  <CloudRain size={24} />
                </div>
-               <h3 className="text-xl font-extrabold text-gray-900">Irrigation</h3>
+               <h3 className="text-xl font-extrabold text-gray-900">{t("results.irrigation")}</h3>
                <div className="space-y-3">
-                 <p className="text-gray-600 font-medium"><span className="text-gray-900 font-bold">Total Water:</span> {crop.details.water}</p>
-                 <p className="text-gray-600 font-medium"><span className="text-gray-900 font-bold">Stages:</span> {crop.details.irrigationStages}</p>
+                 <p className="text-gray-600 font-medium"><span className="text-gray-900 font-bold">{t("results.totalWater")}:</span> {crop.details.water}</p>
+                 <p className="text-gray-600 font-medium"><span className="text-gray-900 font-bold">{t("results.stages")}:</span> {crop.details.irrigationStages}</p>
                  <p className="text-sm bg-gray-50 text-gray-700 p-3 rounded-lg font-medium border border-gray-200">
                    {crop.details.irrigationTip}
                  </p>
@@ -105,10 +105,10 @@ export default function ResultsPage() {
                <div className="w-12 h-12 rounded-2xl bg-yellow-50 flex items-center justify-center text-yellow-600 mb-4 border border-yellow-100">
                  <ShieldCheck size={24} />
                </div>
-               <h3 className="text-xl font-extrabold text-gray-900">Yield Expectation</h3>
+               <h3 className="text-xl font-extrabold text-gray-900">{t("results.yieldExpectation")}</h3>
                <div className="space-y-3">
                  <h4 className="text-4xl font-extrabold text-gray-900">{crop.details.yield}</h4>
-                 <p className="text-gray-500 font-medium">{crop.details.yieldText} in {district}</p>
+                 <p className="text-gray-500 font-medium">{crop.details.yieldText} {t("results.inDistrict")} {district}</p>
                  <div className="w-full bg-gray-100 rounded-full h-3 mt-4">
                     <div className="bg-[#4CAF50] h-3 rounded-full w-[85%]"></div>
                  </div>
@@ -118,26 +118,26 @@ export default function ResultsPage() {
              {/* Block 4: Live Mandi */}
              <div className="space-y-4 bg-gray-50 rounded-2xl p-6 border border-gray-100 shadow-inner">
                <div className="flex justify-between items-center mb-2">
-                 <h3 className="text-xl font-extrabold text-gray-900 border-b-2 border-gray-200 pb-2">Live {district} Mandi</h3>
+                 <h3 className="text-xl font-extrabold text-gray-900 border-b-2 border-gray-200 pb-2">Live {district} {t("results.mandi")}</h3>
                  <TrendingUp size={24} className="text-[#4CAF50]" />
                </div>
                
                <div className="mt-4">
-                 <p className="text-sm text-gray-500 font-semibold uppercase tracking-wider mb-1">Modal Price</p>
+                 <p className="text-sm text-gray-500 font-semibold uppercase tracking-wider mb-1">{t("results.modalPrice")}</p>
                  <p className="text-3xl font-extrabold text-gray-900">{crop.details.price} <span className="text-lg text-gray-500 font-medium">/qtl</span></p>
                </div>
 
                {/* Mini Chart visualization */}
                <div className="mt-8 relative h-12 flex items-end gap-2">
-                 <div className="w-1/4 bg-blue-100 h-[40%] rounded-t-md relative group"><span className="absolute -top-6 text-xs text-gray-500 font-bold hidden group-hover:block transition">Low</span></div>
-                 <div className="w-1/4 bg-blue-200 h-[60%] rounded-t-md relative group"><span className="absolute -top-6 text-xs text-gray-500 font-bold hidden group-hover:block">Avg</span></div>
+                 <div className="w-1/4 bg-blue-100 h-[40%] rounded-t-md relative group"><span className="absolute -top-6 text-xs text-gray-500 font-bold hidden group-hover:block transition">{t("results.low")}</span></div>
+                 <div className="w-1/4 bg-blue-200 h-[60%] rounded-t-md relative group"><span className="absolute -top-6 text-xs text-gray-500 font-bold hidden group-hover:block">{t("results.avg")}</span></div>
                  <div className="w-1/4 bg-[#4CAF50] h-[90%] rounded-t-md relative group"><span className="absolute -top-6 text-xs text-[#4CAF50] font-bold hidden group-hover:block">{crop.details.price}</span></div>
-                 <div className="w-1/4 bg-blue-300 h-[100%] rounded-t-md relative group"><span className="absolute -top-6 text-xs text-gray-500 font-bold hidden group-hover:block">High</span></div>
+                 <div className="w-1/4 bg-blue-300 h-[100%] rounded-t-md relative group"><span className="absolute -top-6 text-xs text-gray-500 font-bold hidden group-hover:block">{t("results.high")}</span></div>
                  <div className="absolute top-0 w-full border-t border-dashed border-gray-300"></div>
                </div>
                <div className="flex justify-between text-xs text-gray-400 font-bold mt-2">
-                 <span>Min</span>
-                 <span>Max</span>
+                 <span>{t("results.min")}</span>
+                 <span>{t("results.max")}</span>
                </div>
              </div>
 

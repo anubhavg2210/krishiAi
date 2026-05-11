@@ -9,169 +9,229 @@
   <img src="https://img.shields.io/badge/Frontend-React+Vite-61DAFB?logo=react" />
   <img src="https://img.shields.io/badge/Backend-FastAPI-009688?logo=fastapi" />
   <img src="https://img.shields.io/badge/AI-Computer%20Vision-orange" />
-  <img src="https://img.shields.io/badge/Hackathon-Project-success" />
 </p>
 
-Kisan AI Sahayak is an interactive, highly responsive AI-powered agricultural tool specifically aimed at empowering farmers in Madhya Pradesh. 
-
-The application consists of a **React-based frontend (Vite)** for a premium user experience and a **Python FastAPI backend** to handle API requests, mock disease analysis, and weather integrations.
+Krishi AI Sahayak is a smart farming assistant built with a React/Vite frontend and Python FastAPI backend. It helps farmers by combining crop disease detection, weather intelligence, and practical farming recommendations.
 
 ---
 
-## ✨ Why Krishi AI?
+## ✨ Key Features
 
-Farmers often lack timely insights about crop health and weather.
-**Krishi AI bridges this gap** by combining AI + real-time data to deliver **actionable guidance** in seconds.
-
----
-
-## 🔥 Key Features
-
-### 🧪 Disease Detection
-
-* Upload plant image
-* AI predicts disease + confidence
-* Instant **treatment advice**
-
-### 🌦 Real-Time Weather
-
-* Live weather via OpenWeatherMap
-* Context-aware suggestions for farming decisions
-
-### 🧠 Smart Advice Engine
-
-* Combines **disease + weather**
-* Produces practical, easy-to-follow steps
+- 🧪 Disease Detection: Upload a plant image and get a diagnosis with treatment and prevention guidance.
+- 🌦 Weather Insights: Live weather data with contextual farming advice.
+- 📅 Smart Timeline: Farming schedule recommendations based on crop stage, weather, and soil.
+- 🎙 Voice Assistant: Hindi/English voice-based farm assistant.
+- 🌾 Crop Suggestion: Soil and weather-aware crop recommendation engine.
 
 ---
 
-## 🛠️ Quick Start & Setup
+## 🚀 One-File Project Guide
 
-Follow these steps to run both the Frontend and Backend locally on your machine.
-
-### Prerequisites
-Make sure you have the following installed on your computer:
-1. **Node.js** (v18+ recommended) - For the frontend
-2. **Python** (v3.9+ recommended) - For the backend
+All important setup and deployment instructions are now consolidated in this README. The root docs that duplicated the same content have been removed to keep the repository clean.
 
 ---
 
-### 1. Environment Setup (.env)
+## ✅ Minimum Requirements
 
-Before running the project, you need to configure your environment variables. 
-1. Copy the provided `.env.example` file and rename it to `.env` in the root folder.
-2. Fill in the required API keys inside the `.env` file:
-   - `VITE_GEMINI_API_KEY`: Required for the Frontend AI Voice Assistant (Get it from [Google AI Studio](https://aistudio.google.com/)).
-   - `API_KEY`: Required for the Backend OpenWeatherMap integration (Get it from [OpenWeatherMap](https://openweathermap.org/)).
+- Node.js 18+ for the frontend
+- Python 3.9+ for the backend
+- Git for version control
 
 ---
 
-### 2. Frontend Setup (React/Vite)
+## 🔧 Environment Variables
 
-The frontend is built using React, Vite, and TailwindCSS.
+Copy `.env.example` to `.env` and add values:
 
-1. Open your terminal and navigate to the frontend folder:
-   ```bash
-   cd frontend
-   ```
+```env
+VITE_GEMINI_API_KEY=your_gemini_api_key
+API_KEY=your_openweathermap_api_key
+VITE_API_URL=http://localhost:8000
+```
 
-2. **Install Frontend Dependencies**:
-   ```bash
-   npm install
-   ```
-
-3. **Run the Frontend Server**:
-   ```bash
-   npm run dev
-   ```
-   Your app will be live at `http://localhost:5173/`.
+- `VITE_GEMINI_API_KEY`: required for the voice assistant.
+- `API_KEY`: optional for OpenWeatherMap weather data; app has a fallback mode.
+- `VITE_API_URL`: backend API base URL for frontend.
 
 ---
 
-### 3. Backend Setup (FastAPI/Python)
+## 🧪 Local Development
 
-The backend is built with FastAPI and runs on Python to serve API endpoints.
+### Frontend
 
-1. Open a **new terminal window** and navigate to the backend folder:
-   ```bash
-   cd backend
-   ```
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
-2. **Create a Virtual Environment** (Highly Recommended):
-   ```bash
-   python -m venv venv
-   # On Windows:
-   venv\Scripts\activate
-   # On Mac/Linux:
-   source venv/bin/activate
-   ```
+Open: `http://localhost:5173`
 
-3. **Install Backend Dependencies**:
-   ```bash
-   pip install -r requirements.txt
-   ```
+### Backend
 
-4. **Run the Backend Server**:
-   ```bash
-   uvicorn app:app --reload
-   ```
-   Your backend will be live at `http://localhost:8000/`.
+```bash
+cd backend
+python -m venv venv
+# Windows:
+venv\Scripts\activate
+# Mac/Linux:
+source venv/bin/activate
+pip install -r requirements.txt
+uvicorn app:app --reload
+```
+
+Open: `http://localhost:8000`
+
+### Verify Backend
+
+```bash
+curl http://localhost:8000/
+```
+
+Expected response:
+
+```json
+{"message":"Backend Running"}
+```
 
 ---
 
-## 📁 Project Structure
+## 📦 Production Deployment
 
-This project uses a separated frontend-backend architecture for scalability.
+### Render (recommended)
+
+1. Push repository to GitHub.
+2. Create Render service for backend:
+   - Build: `pip install -r backend/requirements.txt`
+   - Start: `cd backend && gunicorn -w 4 -k uvicorn.workers.UvicornWorker app:app`
+3. Create Render static site for frontend:
+   - Build: `cd frontend && npm install && npm run build`
+   - Publish: `frontend/dist`
+4. Add environment variables in Render for both services.
+
+### Railway
+
+1. Connect GitHub repository.
+2. Create separate backend and frontend services.
+3. Configure env vars:
+   - `VITE_API_URL`
+   - `VITE_GEMINI_API_KEY`
+   - `API_KEY`
+
+### Vercel
+
+- Deploy frontend as a static site.
+- Set `VITE_API_URL`, `VITE_GEMINI_API_KEY`, and `VITE_GEMINI_MODEL` in Vercel environment settings.
+
+### Backend CORS
+
+Update `backend/app.py` after deployment with your frontend URL:
+
+```python
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",
+        "https://your-frontend-url",
+    ],
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["*"],
+)
+```
+
+---
+
+## ✅ Testing Checklist
+
+### Frontend
+- [ ] `npm run dev` works
+- [ ] App loads at `http://localhost:5173`
+- [ ] Navigation works between pages
+- [ ] Disease detection upload and result flow work
+- [ ] Weather page loads real weather values
+- [ ] Smart timeline generates schedule
+- [ ] Voice assistant responds
+
+### Backend
+- [ ] `uvicorn app:app --reload` starts
+- [ ] `GET /` returns 200
+- [ ] `POST /analyze` accepts plant images
+- [ ] `POST /smart-timeline` returns timeline data
+- [ ] CORS allows frontend origin
+
+### Quick API tests
+
+```bash
+curl -X POST -F "file=@test_image.jpg" http://localhost:8000/analyze
+curl -X POST -H "Content-Type: application/json" -d '{"stage":"vegetative","weather_data":[],"soil":null}' http://localhost:8000/smart-timeline
+```
+
+---
+
+## 🧰 Troubleshooting
+
+### Backend does not start
+
+- Activate virtual environment
+- Install dependencies: `pip install -r requirements.txt`
+- Check Python version: `python --version`
+- Run: `uvicorn app:app --reload`
+
+### Frontend build failure
+
+```bash
+cd frontend
+rm -rf node_modules
+rm package-lock.json
+npm install
+npm run build
+```
+
+### CORS error
+
+- Confirm `VITE_API_URL` points to backend URL
+- Confirm backend CORS origin includes the frontend URL
+- Clear browser cache
+
+---
+
+## 📁 Repository Structure
 
 ```text
 krishiAi/
-├── backend/                 # Python FastAPI Backend
-│   ├── app.py               # Main FastAPI server and API endpoints
-│   └── requirements.txt     # Python dependencies list
-│
-└── frontend/                # React Vite Frontend
-    ├── package.json         # Node.js dependencies and scripts
-    ├── index.html           # Core HTML entry point
-    └── src/                 # All React source code (Pages, Components, Context)
-        ├── App.jsx          # Main Router component
-        ├── index.css        # Tailwind global styling
-        ├── components/      # UI Components (FloatingVoiceAssistant, Navbar)
-        └── pages/           # Application views (Landing, Disease, Weather, etc.)
-``` 
-
----
-
-## 📸 Screenshots
-
-> Replace with your images
-
-![Home](docs/home.png)
-![Disease Detection](docs/disease.png)
-![Results](docs/results.png)
-
----
-
-## 🤝 Contributing
-
-```bash
-git checkout -b feature/your-feature
-git commit -m "Add feature"
-git push
+├── backend/
+│   ├── app.py
+│   ├── weather_engine.py
+│   ├── services/plant_check.py
+│   ├── requirements.txt
+│   └── runtime.txt
+├── frontend/
+│   ├── package.json
+│   ├── vite.config.js
+│   ├── index.html
+│   ├── src/
+│   └── public/
+├── .env.example
+├── .gitignore
+├── Procfile
+└── README.md
 ```
 
-Then open a Pull Request 🚀
+---
+
+## 💡 Notes
+
+- The backend is stateless and does not require a database.
+- Use `.env.example` as the source of truth for required environment variables.
+- Remove duplicate root docs and keep this README as the primary project guide.
 
 ---
 
-## 👨‍💻 Team
+## 🙌 Contributors
 
-* Adarsh Malviya
-* Anubhav Gupta
-* Krishna Sharma
-* Kratika Swarnkar
-
----
-
-## ⭐ Support
-
-If you like this project, give it a ⭐ on GitHub!
+- Adarsh Malviya
+- Anubhav Gupta
+- Krishna Sharma
+- Shubh Sahu
+ 
