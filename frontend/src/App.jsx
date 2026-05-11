@@ -42,7 +42,7 @@ function App() {
           <Route path="/assistant" element={<VoiceAssistantPage />} />
           <Route path="/seed-advisor" element={<SeedAdvisorPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/timeline" element={<TimelinePage />} />
+          {/* <Route path="/timeline" element={<TimelinePage />} /> */}
         </Routes>
       </main>
       <Footer />

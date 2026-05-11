@@ -2,8 +2,10 @@ import { useState, useEffect } from "react";
 import { Sparkles, MapPin, DollarSign, CloudRain, ThermometerSun, Droplets, Info, Leaf } from "lucide-react";
 import SeedCard from "../components/seed/SeedCard";
 import { getSeedRecommendation, SEED_DATABASE } from "../lib/seedEngine";
+import { useAppContext } from "../context/AppContext";
 
 export default function SeedAdvisorPage() {
+  const { t } = useAppContext();
   const [showDemoAlert, setShowDemoAlert] = useState(true);
   
   const [formData, setFormData] = useState({
@@ -58,9 +60,9 @@ export default function SeedAdvisorPage() {
                 <Info size={20} />
               </div>
               <div>
-                <h4 className="font-bold text-gray-900">Demo Mode Active</h4>
+                <h4 className="font-bold text-gray-900">{t("seedAdvisor.demoTitle")}</h4>
                 <p className="text-sm text-gray-600 mt-1 leading-relaxed">
-                  This platform helps farmers choose the right seed, avoid scams, and improve yield using AI-driven recommendations.
+                  {t("seedAdvisor.demoBody")}
                 </p>
               </div>
             </div>
@@ -72,10 +74,10 @@ export default function SeedAdvisorPage() {
       {/* Header */}
       <div className="text-center space-y-4 pt-4">
         <h1 className="text-4xl md:text-5xl font-black text-gray-900 tracking-tight">
-          Kisan Smart <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#4CAF50] to-teal-500">Seed Advisor</span>
+          {t("seedAdvisor.titleA")} <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#4CAF50] to-teal-500">{t("seedAdvisor.titleB")}</span>
         </h1>
         <p className="text-lg text-gray-600 max-w-2xl mx-auto font-medium">
-          Get personalized seed recommendations based on your soil, weather, and budget. Avoid fake seeds and maximize your yield.
+          {t("seedAdvisor.subtitle")}
         </p>
       </div>
 
@@ -86,13 +88,13 @@ export default function SeedAdvisorPage() {
           <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
             <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
               <Sparkles className="text-yellow-500" />
-              Your Field Details
+              {t("seedAdvisor.fieldDetails")}
             </h2>
 
             <div className="space-y-5">
               <div>
                 <label className="text-sm font-semibold text-gray-700 flex items-center gap-2 mb-2">
-                  <MapPin size={16} className="text-gray-400" /> Location
+                  <MapPin size={16} className="text-gray-400" /> {t("seedAdvisor.location")}
                 </label>
                 <input 
                   type="text" 
@@ -105,7 +107,7 @@ export default function SeedAdvisorPage() {
 
               <div>
                 <label className="text-sm font-semibold text-gray-700 flex items-center gap-2 mb-2">
-                  <DollarSign size={16} className="text-gray-400" /> Budget
+                  <DollarSign size={16} className="text-gray-400" /> {t("seedAdvisor.budget")}
                 </label>
                 <select 
                   name="budget"
@@ -113,15 +115,15 @@ export default function SeedAdvisorPage() {
                   onChange={handleInputChange}
                   className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm font-medium focus:ring-2 focus:ring-[#4CAF50] outline-none transition-all"
                 >
-                  <option value="low">Low (Cost Effective)</option>
-                  <option value="medium">Medium (Balanced)</option>
-                  <option value="high">High (Premium/Export)</option>
+                  <option value="low">{t("seedAdvisor.lowBudget")}</option>
+                  <option value="medium">{t("seedAdvisor.mediumBudget")}</option>
+                  <option value="high">{t("seedAdvisor.highBudget")}</option>
                 </select>
               </div>
 
               <div>
                 <label className="text-sm font-semibold text-gray-700 flex items-center gap-2 mb-2">
-                  <Leaf size={16} className="text-gray-400" /> Planned Crop
+                  <Leaf size={16} className="text-gray-400" /> {t("seedAdvisor.crop")}
                 </label>
                 <select 
                   name="crop"
@@ -136,23 +138,23 @@ export default function SeedAdvisorPage() {
               </div>
 
               <div className="pt-4 border-t border-gray-100">
-                <h3 className="text-sm font-bold text-gray-900 mb-4">Weather Conditions</h3>
+                <h3 className="text-sm font-bold text-gray-900 mb-4">{t("seedAdvisor.weather")}</h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="text-xs font-semibold text-gray-600 flex items-center gap-1 mb-1">
-                      <ThermometerSun size={14} /> Temp (°C)
+                      <ThermometerSun size={14} /> {t("seedAdvisor.temp")}
                     </label>
                     <input type="number" name="temp" value={formData.temp} onChange={handleInputChange} className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#4CAF50] outline-none" />
                   </div>
                   <div>
                     <label className="text-xs font-semibold text-gray-600 flex items-center gap-1 mb-1">
-                      <CloudRain size={14} /> Rain (mm)
+                      <CloudRain size={14} /> {t("seedAdvisor.rain")}
                     </label>
                     <input type="number" name="rainfall" value={formData.rainfall} onChange={handleInputChange} className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#4CAF50] outline-none" />
                   </div>
                   <div className="col-span-2">
                     <label className="text-xs font-semibold text-gray-600 flex items-center gap-1 mb-1">
-                      <Droplets size={14} /> Humidity (%)
+                      <Droplets size={14} /> {t("seedAdvisor.humidity")}
                     </label>
                     <input type="number" name="humidity" value={formData.humidity} onChange={handleInputChange} className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#4CAF50] outline-none" />
                   </div>
@@ -164,7 +166,7 @@ export default function SeedAdvisorPage() {
                 className="w-full mt-4 bg-gradient-to-r from-[#4CAF50] to-teal-500 hover:from-[#43A047] hover:to-teal-600 text-white font-bold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2"
               >
                 <Sparkles size={20} />
-                Get Smart Recommendation
+                {t("seedAdvisor.getRecommendation")}
               </button>
             </div>
           </div>
@@ -189,10 +191,10 @@ export default function SeedAdvisorPage() {
                     <div>
                       <div className="flex items-center gap-2 mb-1">
                         <Sparkles className="text-yellow-400" size={18} />
-                        <span className="text-xs font-bold uppercase tracking-wider text-yellow-400">AI Top Pick</span>
+                        <span className="text-xs font-bold uppercase tracking-wider text-yellow-400">{t("seedAdvisor.topPick")}</span>
                       </div>
                       <h2 className="text-3xl font-black">{aiRecommendation.seed.name}</h2>
-                      <p className="text-indigo-200 font-medium">{aiRecommendation.seed.quality} Seed Variety</p>
+                      <p className="text-indigo-200 font-medium">{aiRecommendation.seed.quality} {t("seedAdvisor.variety")}</p>
                     </div>
 
                     <div className="bg-black/20 rounded-xl p-4 border border-white/10">
@@ -215,7 +217,7 @@ export default function SeedAdvisorPage() {
                         onClick={() => window.open(`https://utpannseeds.in/`, "_blank")}
                         className="bg-white text-indigo-900 px-6 py-2 rounded-lg font-bold hover:bg-gray-100 transition-colors shadow-lg"
                       >
-                        Buy This Seed
+                        {t("seedAdvisor.buySeed")}
                       </button>
                     </div>
                   </div>
@@ -227,7 +229,7 @@ export default function SeedAdvisorPage() {
           {/* Seed Market Categories */}
           <div>
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">Seed Market</h2>
+              <h2 className="text-2xl font-bold text-gray-900">{t("seedAdvisor.market")}</h2>
               <div className="flex bg-gray-100 p-1 rounded-xl">
                 {["wheat", "soybean", "gram"].map((tab) => (
                   <button
@@ -251,6 +253,7 @@ export default function SeedAdvisorPage() {
                   key={seed.id} 
                   seed={seed} 
                   onGetRecommendation={handleWhyThisSeed}
+                  t={t}
                 />
               ))}
             </div>

@@ -28,9 +28,9 @@ const PAGE_LABELS = {
 };
 
 const QUICK_ACTIONS = [
-  { label: "Check Weather", icon: CloudSun, route: "/weather", reply: "Weather page opened." },
-  { label: "Crop Suggestion", icon: Sprout, route: "/suggest", reply: "Crop recommendation page opened." },
-  { label: "Disease Detection", icon: Sparkles, route: "/disease", reply: "Disease detection page opened." },
+  { labelKey: "assistant.checkWeather", icon: CloudSun, route: "/weather", reply: "Weather page opened." },
+  { labelKey: "assistant.cropSuggestion", icon: Sprout, route: "/suggest", reply: "Crop recommendation page opened." },
+  { labelKey: "assistant.diseaseDetection", icon: Sparkles, route: "/disease", reply: "Disease detection page opened." },
 ];
 
 function getSpeechRecognition() {
@@ -81,16 +81,16 @@ function speakText(text) {
   });
 }
 
-function buildContextLine({ pathname, district, weatherData }) {
+function buildContextLine({ pathname, district, weatherData, language }) {
   const pageLabel = PAGE_LABELS[pathname] || "app";
   const weatherSummary = weatherData
     ? `District ${district}. Temp ${weatherData.temp}C, humidity ${weatherData.humidity}%, rainfall ${weatherData.rainfall} mm.`
     : `District ${district}. Live weather not loaded.`;
 
-  return `Current page: ${pageLabel}. ${weatherSummary}`;
+  return `Current page: ${pageLabel}. Selected language: ${language === "hi" ? "Hindi" : "English"}. ${weatherSummary}`;
 }
 
-async function askGeminiAndSpeak(message, context, history, onUpdate) {
+async function askGeminiAndSpeak(message, context, history, language, onUpdate) {
   if (!GEMINI_API_KEY) {
     throw new Error("Gemini API key missing hai.");
   }
@@ -113,8 +113,9 @@ async function askGeminiAndSpeak(message, context, history, onUpdate) {
               {
                 text: [
                   "Tum ek behad anubhavi (experienced) desi Kisan ho jo apne kisan bhaiyon ki kheti mein madad karta hai.",
-                  "Tumhari boli aur aawaz ekdum gaon ke samajhdar kisan jaisi honi chahiye. Shuruat hamesha 'Ram Ram bhai', 'Kisan bhai', ya 'Bhaiya' jaise shabdo se karo.",
-                  "Jawab hamesha theth Hindi ya simple Hinglish me do.",
+                  language === "hi"
+                    ? "Tumhari boli aur aawaz ekdum gaon ke samajhdar kisan jaisi honi chahiye. Shuruat hamesha 'Ram Ram bhai', 'Kisan bhai', ya 'Bhaiya' jaise shabdo se karo. Jawab hamesha theth Hindi ya simple Hinglish me do."
+                    : "Reply in clear, practical English with a farmer-friendly tone unless the user asks in Hindi.",
                   "Bohot important: Jawab sawaal ke hisaab se sateek (accurate) aur puri tarah mukammal (complete) hona chahiye. Agar lambi detail chahiye to step-by-step poora samjhao, aur agar chhota sawaal hai to to-the-point jawab do. Par koi bhi sentence aadhura mat chhodna.",
                   "Agar kisan krishi (agriculture), fasal, ya beej ke baare me puche toh apna pura anubhav ek kisan ki tarah saajha karo.",
                   "Diye gaye Context me district aur Live Weather data hai. Mausam ka haal pooche to strictly usi weather data ka use karke batao aur us mausam me kheti ki salah do.",
@@ -257,7 +258,7 @@ function createUserMessage(text) {
   return { role: "user", text, id: `${Date.now()}-user-${Math.random()}` };
 }
 
-function AssistantPanel({ location, district, weatherData }) {
+function AssistantPanel({ location, district, weatherData, language, t }) {
   const SpeechRecognition = getSpeechRecognition();
   const recognitionRef = useRef(null);
   const inputRef = useRef(null);
@@ -270,7 +271,7 @@ function AssistantPanel({ location, district, weatherData }) {
   const [heardText, setHeardText] = useState("");
   const [error, setError] = useState("");
   const [messages, setMessages] = useState([
-    createAssistantMessage("Welcome to Kisan AI Sahayak! I am here to assist you with crop suggestions, weather updates, and disease detection. How can I help you today?"),
+    createAssistantMessage(t("assistant.welcome")),
   ]);
 
   const contextLine = useMemo(
@@ -279,8 +280,9 @@ function AssistantPanel({ location, district, weatherData }) {
         pathname: location.pathname,
         district,
         weatherData,
+        language,
       }),
-    [district, location.pathname, weatherData],
+    [district, language, location.pathname, weatherData],
   );
 
   const latestAssistantReply =
@@ -392,7 +394,7 @@ function AssistantPanel({ location, district, weatherData }) {
          const assistantMessageId = `${Date.now()}-assistant`;
          setMessages((current) => [...current, { role: "assistant", text: "", id: assistantMessageId }]);
          
-         await askGeminiAndSpeak(message, contextLine, historyWithUser, (partialText) => {
+         await askGeminiAndSpeak(message, contextLine, historyWithUser, language, (partialText) => {
             setMessages((current) => 
                current.map((m) => m.id === assistantMessageId ? { ...m, text: partialText } : m)
             );
@@ -460,7 +462,7 @@ function AssistantPanel({ location, district, weatherData }) {
               </div>
               <div>
                 <h1 className="text-xl font-extrabold tracking-tight text-[#1a4a38]">Kisan AI Sahayak</h1>
-                <p className="mt-0.5 text-xs font-medium text-[#1a4a38]/80">Intelligent decisions for your farm</p>
+                <p className="mt-0.5 text-xs font-medium text-[#1a4a38]/80">{t("assistant.tagline")}</p>
               </div>
             </div>
             <div className="rounded-2xl border border-[#b3d7af] bg-white/60 px-4 py-1.5 text-xs font-bold text-[#1a4a38] shadow-sm backdrop-blur-md">
@@ -476,13 +478,13 @@ function AssistantPanel({ location, district, weatherData }) {
               const Icon = action.icon;
               return (
                 <button
-                  key={action.label}
+                  key={action.labelKey}
                   type="button"
                   onClick={() => handleQuickAction(action)}
                   className="group flex items-center gap-2 rounded-2xl border border-slate-200/60 bg-white/80 px-4 py-2 text-[13px] font-semibold text-[#1a4a38] shadow-sm transition-all hover:-translate-y-0.5 hover:border-[#b3d7af] hover:bg-[#eef7ec] hover:text-[#1a4a38] hover:shadow-md"
                 >
                   <Icon size={16} className="text-[#4CAF50] transition-colors group-hover:text-[#1a4a38]" />
-                  <span>{action.label}</span>
+                  <span>{t(action.labelKey)}</span>
                 </button>
               );
             })}
@@ -512,7 +514,7 @@ function AssistantPanel({ location, district, weatherData }) {
                 >
                   <div className={`mb-1.5 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest ${message.role === "assistant" ? "text-[#1a4a38]" : "text-slate-300"}`}>
                     {message.role === "assistant" ? <Bot size={13} /> : <Send size={13} />}
-                    {message.role === "assistant" ? "Kisan AI" : "You"}
+                    {message.role === "assistant" ? "Kisan AI" : t("assistant.you")}
                   </div>
                   <p className="whitespace-pre-wrap">{message.text}</p>
                 </div>
@@ -524,7 +526,7 @@ function AssistantPanel({ location, district, weatherData }) {
                 <div className="max-w-[85%] rounded-[2rem] rounded-tl-sm border border-[#b3d7af]/50 bg-[#eef7ec]/80 px-5 py-4 text-[15px] text-[#1a4a38] backdrop-blur-sm">
                   <div className="flex items-center gap-2">
                     <span className="flex h-2 w-2 rounded-full bg-[#4CAF50] animate-pulse"></span>
-                    <span className="font-medium">Listening:</span> {heardText}
+                    <span className="font-medium">{t("assistant.listening")}</span> {heardText}
                   </div>
                 </div>
               </motion.div>
@@ -560,7 +562,7 @@ function AssistantPanel({ location, district, weatherData }) {
                 type="text"
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="Ask your farming questions..."
+                placeholder={t("assistant.placeholder")}
                 className="w-full border-0 bg-transparent py-3 pl-5 pr-12 text-[15px] font-medium text-slate-800 outline-none placeholder:text-slate-400"
               />
               <button
@@ -571,7 +573,7 @@ function AssistantPanel({ location, district, weatherData }) {
                     ? "bg-red-500 text-white shadow-lg shadow-red-500/30 animate-pulse"
                     : "bg-[#eef7ec] text-[#1a4a38] hover:bg-[#d9eed4]"
                 }`}
-                aria-label="Start voice input"
+                aria-label={t("assistant.startVoice")}
               >
                 {isListening ? <MicOff size={18} /> : <Mic size={18} />}
               </button>
@@ -581,7 +583,7 @@ function AssistantPanel({ location, district, weatherData }) {
               type="button"
               onClick={() => speakText(latestAssistantReply)}
               className="flex h-[3.25rem] w-[3.25rem] shrink-0 items-center justify-center rounded-full border border-white/60 bg-white/80 text-slate-600 shadow-sm transition-all hover:-translate-y-0.5 hover:bg-white hover:text-[#1a4a38] hover:shadow-md"
-              aria-label="Speak latest reply"
+              aria-label={t("assistant.speakLatest")}
             >
               <Volume2 size={20} />
             </button>
@@ -590,7 +592,7 @@ function AssistantPanel({ location, district, weatherData }) {
               type="submit"
               disabled={isLoading || !query.trim()}
               className="flex h-[3.25rem] w-[3.25rem] shrink-0 items-center justify-center rounded-full bg-[#1a4a38] text-white shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-[#1a4a38]/30 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
-              aria-label="Send message"
+              aria-label={t("assistant.send")}
             >
                <Send size={20} className={isLoading || !query.trim() ? "opacity-50" : "ml-1"} />
             </button>
@@ -604,10 +606,23 @@ function AssistantPanel({ location, district, weatherData }) {
 export default function FloatingVoiceAssistant({ mode = "floating" }) {
   const location = useLocation();
   const navigate = useNavigate();
-  const { district, weatherData } = useAppContext();
+  const { district, weatherData, language, t } = useAppContext();
+  const [showIntro, setShowIntro] = useState(true);
+
+  useEffect(() => {
+    if (mode === "page") {
+      return undefined;
+    }
+
+    const timer = window.setTimeout(() => {
+      setShowIntro(false);
+    }, 7000);
+
+    return () => window.clearTimeout(timer);
+  }, [mode]);
 
   if (mode === "page") {
-    return <AssistantPanel location={location} district={district} weatherData={weatherData} />;
+    return <AssistantPanel location={location} district={district} weatherData={weatherData} language={language} t={t} />;
   }
 
   if (location.pathname === "/assistant") {
@@ -618,7 +633,10 @@ export default function FloatingVoiceAssistant({ mode = "floating" }) {
     <div className="fixed bottom-6 right-6 z-[100]">
       <motion.button
         type="button"
-        onClick={() => navigate("/assistant")}
+        onClick={() => {
+          setShowIntro(false);
+          navigate("/assistant");
+        }}
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         transition={{ type: "spring", stiffness: 260, damping: 20 }}
@@ -626,9 +644,13 @@ export default function FloatingVoiceAssistant({ mode = "floating" }) {
         aria-label="Open voice assistant page"
       >
         {/* Tooltip */}
-        <div className="absolute -top-14 right-0 rounded-2xl bg-slate-900 px-4 py-2 text-[13px] font-bold tracking-wide text-white opacity-0 shadow-xl transition-all duration-300 group-hover:-translate-y-1 group-hover:opacity-100 whitespace-nowrap z-20">
-          Kisan Assistant
-          <div className="absolute -bottom-1.5 right-8 h-3 w-3 rotate-45 bg-slate-900"></div>
+        <div
+          className={`absolute bottom-4 right-[6.5rem] w-[21rem] rounded-2xl border border-gray-100 bg-white px-5 py-4 text-left text-base font-bold leading-snug text-gray-900 shadow-2xl shadow-gray-900/15 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100 sm:w-[26rem] ${
+            showIntro ? "translate-x-0 opacity-100" : "translate-x-3 opacity-0 pointer-events-none"
+          }`}
+        >
+          {t("assistant.floatingIntro")}
+          <div className="absolute right-[-0.45rem] top-1/2 h-4 w-4 -translate-y-1/2 rotate-45 border-r border-t border-gray-100 bg-white"></div>
         </div>
 
         {/* Original Farmer Icon */}

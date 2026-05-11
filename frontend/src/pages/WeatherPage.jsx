@@ -11,6 +11,7 @@ import {
   Leaf, RefreshCw, MapPin, Loader2, ArrowUp, Sun,
 } from "lucide-react";
 import { fetchWeatherForDistrict, MP_DISTRICTS } from "../lib/weatherService";
+import { useAppContext } from "../context/AppContext";
 
 // ─── Utility ────────────────────────────────────────────────────────────────
 
@@ -21,11 +22,11 @@ function degToCompass(deg) {
 }
 
 /** Pressure category */
-function pressureLabel(p) {
-  if (p < 1000) return { label: "Low", color: "#ef4444" };
-  if (p < 1013) return { label: "Normal Low", color: "#f97316" };
-  if (p < 1020) return { label: "Normal", color: "#22c55e" };
-  return               { label: "High", color: "#3b82f6" };
+function pressureLabel(p, t) {
+  if (p < 1000) return { label: t("weather.low"), color: "#ef4444" };
+  if (p < 1013) return { label: t("weather.normalLow"), color: "#f97316" };
+  if (p < 1020) return { label: t("weather.normal"), color: "#22c55e" };
+  return               { label: t("weather.high"), color: "#3b82f6" };
 }
 
 // ─── Sub-components ──────────────────────────────────────────────────────────
@@ -244,6 +245,7 @@ function StatPill({ icon, label, value, bg = "#f0faf0", accent = "#4CAF50" }) {
 // ─── Main Page ───────────────────────────────────────────────────────────────
 
 export default function WeatherPage() {
+  const { t } = useAppContext();
   const [district, setDistrict] = useState("Indore");
   const [weather, setWeather]   = useState(null);
   const [status, setStatus]     = useState("idle");   // idle | loading | success | error
@@ -264,15 +266,15 @@ export default function WeatherPage() {
 
   useEffect(() => { load(district); }, [district, load]);
 
-  const pLabel = weather ? pressureLabel(weather.pressure) : null;
+  const pLabel = weather ? pressureLabel(weather.pressure, t) : null;
 
   return (
     <div className="w-full max-w-5xl mx-auto pb-16">
 
       {/* ── Page Header ── */}
       <div className="mb-8">
-        <h1 className="text-4xl font-extrabold text-gray-900 mb-1">Weather Condition</h1>
-        <p className="text-gray-500 font-medium text-lg">Live atmospheric data for Madhya Pradesh districts</p>
+        <h1 className="text-4xl font-extrabold text-gray-900 mb-1">{t("weather.title")}</h1>
+        <p className="text-gray-500 font-medium text-lg">{t("weather.subtitle")}</p>
       </div>
 
       {/* ── District Selector Bar ── */}
@@ -301,7 +303,7 @@ export default function WeatherPage() {
         <div className="flex items-center gap-3">
           {lastUpdated && (
             <span className="text-xs font-semibold text-gray-400">
-              Updated {lastUpdated}
+              {t("weather.updated")} {lastUpdated}
             </span>
           )}
           <button
@@ -315,7 +317,7 @@ export default function WeatherPage() {
             }}
           >
             <RefreshCw size={14} className={status === "loading" ? "animate-spin" : ""} />
-            Refresh
+            {t("weather.refresh")}
           </button>
         </div>
       </div>
@@ -328,7 +330,7 @@ export default function WeatherPage() {
             <div className="absolute inset-3 rounded-full border-4 border-green-100 border-b-green-400 animate-spin animate-reverse" />
             <Leaf className="absolute inset-0 m-auto text-[#4CAF50]" size={24} />
           </div>
-          <p className="text-gray-500 font-semibold animate-pulse">Fetching live data for {district}…</p>
+          <p className="text-gray-500 font-semibold animate-pulse">{t("weather.fetching")} {district}...</p>
         </div>
       )}
 
@@ -343,13 +345,13 @@ export default function WeatherPage() {
           }}
         >
           <span className="text-5xl">⚠️</span>
-          <p className="text-gray-700 font-bold text-lg">Could not reach weather service</p>
+          <p className="text-gray-700 font-bold text-lg">{t("weather.error")}</p>
           <button
             onClick={() => load(district)}
             className="mt-2 flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white"
             style={{ background: "linear-gradient(135deg, #ef4444, #dc2626)", boxShadow: "0 4px 12px rgba(239,68,68,0.3)" }}
           >
-            <RefreshCw size={14} /> Try Again
+            <RefreshCw size={14} /> {t("weather.tryAgain")}
           </button>
         </div>
       )}
@@ -377,7 +379,7 @@ export default function WeatherPage() {
                       <p className="text-5xl sm:text-6xl font-black text-gray-900 leading-none">
                         {weather.temp}<span className="text-3xl text-gray-400 font-bold">°C</span>
                       </p>
-                      <p className="text-sm font-semibold text-gray-500 mt-1">Feels like {weather.feelsLike}°C</p>
+                      <p className="text-sm font-semibold text-gray-500 mt-1">{t("weather.feelsLike")} {weather.feelsLike}°C</p>
                     </div>
                   </div>
                   <p className="text-xl font-bold text-gray-700">{weather.description}</p>
@@ -396,7 +398,7 @@ export default function WeatherPage() {
                     }}
                   >
                     <Droplets size={16} className="text-blue-500" />
-                    <span className="text-sm font-bold text-gray-700">{weather.humidity}% Humidity</span>
+                    <span className="text-sm font-bold text-gray-700">{weather.humidity}% {t("weather.humidity")}</span>
                   </div>
                   <div className="flex items-center gap-2 px-4 py-2.5 rounded-2xl"
                     style={{
@@ -406,7 +408,7 @@ export default function WeatherPage() {
                     }}
                   >
                     <CloudSun size={16} className="text-[#4CAF50]" />
-                    <span className="text-sm font-bold text-gray-700">{weather.cloudCover}% Clouds</span>
+                    <span className="text-sm font-bold text-gray-700">{weather.cloudCover}% {t("weather.clouds")}</span>
                   </div>
                   <div className="flex items-center gap-2 px-4 py-2.5 rounded-2xl"
                     style={{
@@ -416,7 +418,7 @@ export default function WeatherPage() {
                     }}
                   >
                     <CloudSun size={16} className="text-orange-500" />
-                    <span className="text-sm font-bold text-gray-700">{weather.rainfall} mm Rain</span>
+                    <span className="text-sm font-bold text-gray-700">{weather.rainfall} mm {t("weather.rain")}</span>
                   </div>
                 </div>
               </div>
@@ -426,10 +428,10 @@ export default function WeatherPage() {
             <SkeCard className="p-6 flex flex-col items-center justify-center gap-4">
               <div className="absolute top-0 left-0 w-full h-1 rounded-tl-[1.5rem] rounded-tr-[1.5rem]"
                 style={{ background: "linear-gradient(to right, #4CAF50, #81C784)" }} />
-              <p className="text-xs font-black uppercase tracking-widest text-[#4CAF50]">Wind</p>
+              <p className="text-xs font-black uppercase tracking-widest text-[#4CAF50]">{t("weather.wind")}</p>
               <WindCompass deg={weather.windDir} speed={weather.windSpeed} />
               <div className="text-center">
-                <p className="text-xs font-semibold text-gray-400">Direction: <span className="text-gray-700 font-bold">{degToCompass(weather.windDir)}</span></p>
+                <p className="text-xs font-semibold text-gray-400">{t("weather.direction")}: <span className="text-gray-700 font-bold">{degToCompass(weather.windDir)}</span></p>
               </div>
             </SkeCard>
           </div>
@@ -438,12 +440,12 @@ export default function WeatherPage() {
           <SkeCard className="p-6 relative">
             <div className="absolute top-0 left-0 w-full h-1 rounded-tl-[1.5rem] rounded-tr-[1.5rem]"
               style={{ background: "linear-gradient(to right, #4CAF50, #2196F3, #4CAF50)" }} />
-            <p className="text-xs font-black uppercase tracking-widest text-gray-500 mb-6 text-center">Live Sensors</p>
+            <p className="text-xs font-black uppercase tracking-widest text-gray-500 mb-6 text-center">{t("weather.sensors")}</p>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 place-items-center">
-              <GaugeDial value={weather.humidity}   max={100}  color="#3b82f6"  label="Humidity"   unit="%"    icon={<Droplets size={12}    className="text-blue-500"   />} />
-              <GaugeDial value={weather.cloudCover} max={100}  color="#6b7280"  label="Cloud Cover" unit="%"   icon={<CloudSun size={12}    className="text-gray-500"   />} />
-              <GaugeDial value={weather.windSpeed}  max={120}  color="#4CAF50"  label="Wind"       unit="km/h" icon={<Wind size={12}       className="text-green-600"  />} />
-              <GaugeDial value={weather.uvIndex ?? 0} max={12} color="#f59e0b"  label="UV Index"   unit="idx"  icon={<Sun size={12}        className="text-amber-500"  />} />
+              <GaugeDial value={weather.humidity}   max={100}  color="#3b82f6"  label={t("weather.humidity")}   unit="%"    icon={<Droplets size={12}    className="text-blue-500"   />} />
+              <GaugeDial value={weather.cloudCover} max={100}  color="#6b7280"  label={t("weather.cloudCover")} unit="%"   icon={<CloudSun size={12}    className="text-gray-500"   />} />
+              <GaugeDial value={weather.windSpeed}  max={120}  color="#4CAF50"  label={t("weather.wind")}       unit="km/h" icon={<Wind size={12}       className="text-green-600"  />} />
+              <GaugeDial value={weather.uvIndex ?? 0} max={12} color="#f59e0b"  label={t("weather.uvIndex")}   unit="idx"  icon={<Sun size={12}        className="text-amber-500"  />} />
             </div>
           </SkeCard>
 
@@ -455,7 +457,7 @@ export default function WeatherPage() {
               <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full opacity-10 blur-2xl"
                 style={{ background: "radial-gradient(circle, #22c55e, transparent)" }} />
               <p className="text-xs font-black uppercase tracking-widest text-gray-500 mb-5 flex items-center gap-2">
-                <Leaf size={13} className="text-[#4CAF50]" /> Air Quality Index
+                <Leaf size={13} className="text-[#4CAF50]" /> {t("weather.airQuality")}
               </p>
               <AQIBar
                 aqi={weather.aqi}
@@ -473,7 +475,7 @@ export default function WeatherPage() {
                 <div className="absolute top-0 left-0 w-full h-1 rounded-tl-[1.5rem] rounded-tr-[1.5rem]"
                   style={{ background: `linear-gradient(to right, ${pLabel?.color ?? "#4CAF50"}, #4CAF50)` }} />
                 <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-4 flex items-center gap-1.5">
-                  <Gauge size={11} /> Pressure
+                  <Gauge size={11} /> {t("weather.pressure")}
                 </p>
                 <div className="flex items-end justify-between">
                   <div>
@@ -501,13 +503,13 @@ export default function WeatherPage() {
 
               <SkeCard className="p-5 flex-1">
                 <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-4 flex items-center gap-1.5">
-                  <Eye size={11} /> Visibility
+                  <Eye size={11} /> {t("weather.visibility")}
                 </p>
                 <p className="text-3xl font-black text-gray-800">{weather.visibility} <span className="text-sm text-gray-400 font-bold">km</span></p>
                 <p className="text-xs text-gray-500 font-semibold mt-1">
-                  {parseFloat(weather.visibility) > 10 ? "🟢 Excellent" :
-                   parseFloat(weather.visibility) > 5  ? "🟡 Good" :
-                   parseFloat(weather.visibility) > 2  ? "🟠 Moderate" : "🔴 Poor"}
+                  {parseFloat(weather.visibility) > 10 ? `🟢 ${t("weather.excellent")}` :
+                   parseFloat(weather.visibility) > 5  ? `🟡 ${t("weather.good")}` :
+                   parseFloat(weather.visibility) > 2  ? `🟠 ${t("weather.moderate")}` : `🔴 ${t("weather.poor")}`}
                 </p>
               </SkeCard>
             </div>
@@ -517,28 +519,28 @@ export default function WeatherPage() {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <StatPill
               icon={<Sun size={18} />}
-              label="UV Index"
+              label={t("weather.uvIndex")}
               value={`${weather.uvIndex ?? "N/A"} — ${weather.uvCategory.label}`}
               accent={weather.uvCategory.color}
               bg={`${weather.uvCategory.color}10`}
             />
             <StatPill
               icon={<Thermometer size={18} />}
-              label="Feels Like"
+              label={t("weather.feelsLike")}
               value={`${weather.feelsLike}°C`}
               accent="#ef4444"
               bg="#fff1f1"
             />
             <StatPill
               icon={<Zap size={18} />}
-              label="Rainfall"
+              label={t("weather.rainfall")}
               value={`${weather.rainfall} mm`}
               accent="#3b82f6"
               bg="#eff6ff"
             />
             <StatPill
               icon={<ArrowUp size={18} />}
-              label="Wind Dir"
+              label={t("weather.windDir")}
               value={`${degToCompass(weather.windDir)} / ${weather.windDir}°`}
               accent="#8b5cf6"
               bg="#f5f3ff"
@@ -549,7 +551,7 @@ export default function WeatherPage() {
           <SkeCard className="p-6 relative">
             <div className="absolute -bottom-10 -left-10 w-40 h-40 rounded-full opacity-10 blur-2xl"
               style={{ background: "radial-gradient(circle, #4CAF50, transparent)" }} />
-            <p className="text-xs font-black uppercase tracking-widest text-gray-500 mb-5">Today's Hourly Forecast</p>
+            <p className="text-xs font-black uppercase tracking-widest text-gray-500 mb-5">{t("weather.hourly")}</p>
             <HourlyForecast forecast={weather.forecast} />
           </SkeCard>
 
@@ -565,7 +567,7 @@ export default function WeatherPage() {
               className="text-[#4CAF50] font-semibold hover:underline">
               Open-Meteo Air Quality
             </a>{" "}
-            — Free, no API key required
+            — {t("weather.poweredBySuffix")}
           </p>
         </div>
       )}

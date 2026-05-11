@@ -1,4 +1,8 @@
+import { useAppContext } from "../../context/AppContext";
+
 export default function Footer() {
+  const { t } = useAppContext();
+
   return (
     <footer className="bg-white border-t border-gray-200 py-10 mt-auto">
       <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
@@ -7,11 +11,13 @@ export default function Footer() {
             <p className="font-semibold text-gray-900 text-base flex items-center gap-2">
               <span className="text-[#4CAF50]">Kisan AI</span> Sahayak
             </p>
-            <p className="mt-1">Free AI for better yields. © {new Date().getFullYear()}</p>
+            <p className="mt-1">{t("footer.tagline")} © {new Date().getFullYear()}</p>
           </div>
           <div className="text-center md:text-right">
-            <span className="font-semibold text-gray-700 block mb-1">Proudly supporting farmers in MP:</span>
-            <span className="text-gray-400">Indore • Sehore • Vidisha • Raisen • Shivpuri • Gwalior • Ujjain • Hoshangabad • Sagar • Satna</span>
+            <span className="font-semibold text-gray-700 block mb-1">{t("footer.supporting")}</span>
+            <span className="text-gray-400">
+              Indore • Sehore • Vidisha • Raisen • Shivpuri • Gwalior • Ujjain • Hoshangabad • Sagar • Satna
+            </span>
           </div>
         </div>
       </div>
