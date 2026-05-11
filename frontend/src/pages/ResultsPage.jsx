@@ -5,32 +5,64 @@
  * It presents a uniform, rich visual layout showing the crop image, 
  * seed/fertilizer requirements, irrigation scheduling, and real-time mandi prices.
  */
-import { ArrowLeft, Save, Share2, TrendingUp, CheckCircle, Sprout, CloudRain, ShieldCheck } from "lucide-react";
-import { Link, Navigate } from "react-router-dom";
+import { ArrowLeft, Save, Share2, TrendingUp, CheckCircle, Sprout, CloudRain, ShieldCheck, ThermometerSun, Leaf, Activity } from "lucide-react";
+import { Link, Navigate, useLocation } from "react-router-dom";
 import { useAppContext } from "../context/AppContext";
-import { inferBestCrop } from "../lib/cropEngine";
+import { CROP_LIBRARY } from "../lib/cropEngine";
+
+// Dynamic insight generator
+const generateInsight = (cropName, weather, soil) => {
+  if (!weather || !soil) return `${cropName} is highly recommended for your specific region.`;
+  
+  let reasons = [];
+  if (soil.N > 70) reasons.push("rich nitrogen levels");
+  else if (soil.N < 30) reasons.push("current nitrogen levels");
+  
+  if (weather.temp > 28) reasons.push("warm climate");
+  else if (weather.temp < 20) reasons.push("cool weather");
+  
+  if (weather.rainfall > 120) reasons.push("high rainfall expectations");
+  else if (weather.rainfall < 60) reasons.push("dry conditions");
+  
+  if (reasons.length > 0) {
+    return `${cropName} is perfectly suited for you because your ${reasons.join(" and ")} match its ideal growing environment.`;
+  }
+  return `Your current soil and weather parameters provide an optimal foundation for growing ${cropName}.`;
+};
+
+// Fallback image handler
+const handleImageError = (e) => {
+  e.target.src = "https://images.unsplash.com/photo-1625246333195-78d9c38ad449?auto=format&fit=crop&w=1600&q=80"; // Reliable generic agriculture field fallback
+};
 
 export default function ResultsPage() {
   const { district, soilData } = useAppContext();
+  const location = useLocation();
+  const { aiResult, error } = location.state || {};
 
-  // If there is no soilData, the user didn't submit the form. Redirect them.
-  if (!soilData) {
+  // If there is no soilData or aiResult, redirect
+  if (!soilData || !aiResult) {
     return <Navigate to="/suggest" replace />;
   }
 
-  // Calculate the best crop based on the soil data
-  const crop = inferBestCrop(soilData);
+  const recommendedName = aiResult.recommended_crop.toLowerCase();
+  let crop = CROP_LIBRARY.find(c => c.name.toLowerCase() === recommendedName) || CROP_LIBRARY[0];
+  
+  const topConfidenceStr = aiResult.top_3_recommendations[0]?.confidence || "90%";
+  crop = { ...crop, matchScore: topConfidenceStr };
+
+  const dynamicInsight = generateInsight(crop.name, aiResult.weather_used, soilData);
 
   return (
-    <div className="max-w-6xl mx-auto w-full">
+    <div className="max-w-6xl mx-auto w-full pb-10">
       {/* Top Action Bar */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
         <div>
           <Link to="/suggest" className="text-sm font-bold text-gray-500 hover:text-[#2196F3] flex items-center gap-2 mb-2 transition-colors">
             <ArrowLeft size={16} /> Try Different Inputs
           </Link>
-          <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900">
-            Recommended for <span className="text-[#4CAF50]">{district}</span>
+          <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 tracking-tight">
+            AI Recommended for <span className="text-[#4CAF50]">{district}</span>
           </h1>
         </div>
         <div className="flex gap-3 w-full sm:w-auto">
@@ -43,27 +75,42 @@ export default function ResultsPage() {
         </div>
       </div>
 
-      {/* Main Results Grid (Uniform / Spaced Out layout) */}
-      <div className="bg-white rounded-[2rem] shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden">
+      {/* Main Results Grid */}
+      <div className="bg-white rounded-[2rem] shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden mb-8">
         
         {/* Banner */}
-        <div className="relative h-64 md:h-80 w-full overflow-hidden">
+        <div className="relative h-72 md:h-96 w-full overflow-hidden group">
           <img 
             src={crop.image} 
             alt={crop.name} 
-            className="w-full h-full object-cover"
+            onError={handleImageError}
+            className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700 ease-in-out"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-gray-900/90 via-gray-900/40 to-transparent flex flex-col justify-end p-8 md:p-12">
-             <div className="flex items-center gap-3 mb-2">
-               <span className="bg-[#4CAF50] text-white px-3 py-1.5 rounded-lg text-sm font-bold flex items-center gap-1">
-                 <CheckCircle size={16} /> {crop.matchScore}% Match
+          <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/60 to-transparent flex flex-col justify-end p-8 md:p-12">
+             <div className="flex flex-wrap items-center gap-3 mb-4">
+               <span className="bg-[#4CAF50] text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-1.5 shadow-lg">
+                 <CheckCircle size={16} /> {crop.matchScore} AI Match
                </span>
-               <span className="bg-white/20 backdrop-blur-md text-white px-3 py-1.5 rounded-lg text-sm font-bold">
-                 High Yield Potential
+               <span className="bg-orange-500/90 backdrop-blur-md text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-1.5 shadow-lg">
+                 {crop.season}
+               </span>
+               <span className="bg-blue-500/90 backdrop-blur-md text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-1.5 shadow-lg">
+                 <ThermometerSun size={16}/> {aiResult.weather_used.temp}°C
+               </span>
+               <span className="bg-blue-400/90 backdrop-blur-md text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-1.5 shadow-lg">
+                 <CloudRain size={16}/> {aiResult.weather_used.rainfall}mm Rain
                </span>
              </div>
-             <h2 className="text-5xl md:text-6xl font-extrabold text-white">{crop.name} <span className="text-gray-300 font-medium text-3xl ml-2">({crop.hindiName})</span></h2>
+             <h2 className="text-5xl md:text-7xl font-extrabold text-white tracking-tight">{crop.name} <span className="text-gray-300 font-medium text-3xl md:text-4xl ml-2">({crop.hindiName})</span></h2>
           </div>
+        </div>
+
+        {/* AI Insight Box */}
+        <div className="bg-[#f0f9ff] border-l-4 border-[#2196F3] p-6 md:p-8 mx-8 md:mx-12 mt-8 rounded-r-xl">
+          <p className="text-lg md:text-xl font-medium text-blue-900 flex gap-3 items-start">
+            <Activity className="text-[#2196F3] mt-1 shrink-0" size={24} />
+            <span><strong>Smart Insight:</strong> {dynamicInsight} This crop offers <strong>{(crop.profitability || "High").toLowerCase()} profitability</strong> and requires <strong>{(crop.difficulty || "Moderate").toLowerCase()}</strong> farming effort.</span>
+          </p>
         </div>
 
         {/* Info Grid - Generously spaced */}
@@ -80,7 +127,7 @@ export default function ResultsPage() {
                  <p className="text-gray-600 font-medium"><span className="text-gray-900 font-bold">Seed:</span> {crop.details.seed}</p>
                  <p className="text-gray-600 font-medium"><span className="text-gray-900 font-bold">NPK:</span> {crop.details.npkText}</p>
                  <p className="text-sm border border-orange-200 bg-orange-50 text-orange-700 p-3 rounded-lg font-semibold mt-2">
-                   {crop.details.extraTip}
+                   💡 {crop.details.extraTip}
                  </p>
                </div>
             </div>
@@ -92,10 +139,10 @@ export default function ResultsPage() {
                </div>
                <h3 className="text-xl font-extrabold text-gray-900">Irrigation</h3>
                <div className="space-y-3">
-                 <p className="text-gray-600 font-medium"><span className="text-gray-900 font-bold">Total Water:</span> {crop.details.water}</p>
+                 <p className="text-gray-600 font-medium"><span className="text-gray-900 font-bold">Water Need:</span> {crop.waterNeed}</p>
                  <p className="text-gray-600 font-medium"><span className="text-gray-900 font-bold">Stages:</span> {crop.details.irrigationStages}</p>
                  <p className="text-sm bg-gray-50 text-gray-700 p-3 rounded-lg font-medium border border-gray-200">
-                   {crop.details.irrigationTip}
+                   💧 {crop.details.irrigationTip}
                  </p>
                </div>
             </div>
@@ -144,6 +191,47 @@ export default function ResultsPage() {
           </div>
         </div>
       </div>
+
+      {/* Top 3 AI Recommendations */}
+      <div>
+        <h3 className="text-2xl font-extrabold text-gray-900 mb-6 flex items-center gap-2">
+           <Sprout className="text-[#4CAF50]"/> Alternate AI Suggestions
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {aiResult.top_3_recommendations.slice(1).map((rec, idx) => {
+            const recInfo = CROP_LIBRARY.find(c => c.name.toLowerCase() === rec.crop.toLowerCase()) || CROP_LIBRARY[0];
+            return (
+              <div key={idx} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col items-start gap-5 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer group">
+                <div className="w-full h-40 overflow-hidden rounded-xl">
+                  <img src={recInfo.image} onError={handleImageError} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt={rec.crop} />
+                </div>
+                
+                <div className="w-full">
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <h4 className="text-2xl font-bold text-gray-900 tracking-tight">{rec.crop} <span className="text-base font-medium text-gray-500">({recInfo.hindiName})</span></h4>
+                    </div>
+                    <span className="text-[#4CAF50] font-bold text-sm bg-green-50 px-3 py-1 rounded-full border border-green-100 whitespace-nowrap">{rec.confidence} Match</span>
+                  </div>
+                  
+                  <span className="text-orange-700 font-bold text-xs bg-orange-50 px-3 py-1.5 rounded-lg border border-orange-100 inline-block mb-4">{recInfo.season}</span>
+                  
+                  <div className="grid grid-cols-2 gap-3 text-sm font-medium text-gray-600 mb-4 bg-gray-50 p-3 rounded-lg border border-gray-100">
+                    <div className="flex items-center gap-1.5"><ThermometerSun size={14} className="text-yellow-500"/> {recInfo.tempRange}</div>
+                    <div className="flex items-center gap-1.5"><CloudRain size={14} className="text-blue-400"/> {recInfo.waterNeed.split(' ')[0]}</div>
+                    <div className="flex items-center gap-1.5"><TrendingUp size={14} className="text-green-500"/> Profit: {recInfo.profitability}</div>
+                    <div className="flex items-center gap-1.5"><Leaf size={14} className="text-green-600"/> {recInfo.soilType}</div>
+                  </div>
+                  
+                  <p className="text-sm text-gray-600 line-clamp-2"><strong>💡 Tip:</strong> {recInfo.details.extraTip}</p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
     </div>
   );
 }
+

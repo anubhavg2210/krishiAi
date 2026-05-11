@@ -90,14 +90,31 @@ export default function CropSuggestForm() {
     loadWeather(district);
   }, [district, loadWeather]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setSoilData(soil); // Save input to context
-    setTimeout(() => {
+    
+    try {
+      const response = await fetch("http://localhost:8000/crop-recommendation", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          city: district,
+          N: soil.N,
+          P: soil.P,
+          K: soil.K,
+          ph: soil.pH
+        })
+      });
+      const data = await response.json();
+      navigate("/results", { state: { aiResult: data } });
+    } catch (error) {
+      console.error("Error fetching recommendation:", error);
+      navigate("/results", { state: { error: true } });
+    } finally {
       setLoading(false);
-      navigate("/results");
-    }, 1500);
+    }
   };
 
   // ── Weather card content ─────────────────────────────────────────────────

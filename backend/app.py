@@ -13,9 +13,20 @@ from tensorflow.keras.applications.mobilenet_v2 import preprocess_input, decode_
 from fastapi import Body
 from weather_engine import run_engine
 from fastapi import Form
+import joblib
+import pandas as pd
 
 from pydantic import BaseModel
 from typing import List, Optional
+
+# Load crop model
+CROP_MODEL_PATH = os.path.join(os.path.dirname(__file__), "crop_model.pkl")
+try:
+    crop_model = joblib.load(CROP_MODEL_PATH)
+    print("Crop model loaded successfully!")
+except Exception as e:
+    print("Could not load crop model:", e)
+    crop_model = None
 
 class WeatherDay(BaseModel):
     day: str
@@ -320,17 +331,59 @@ def get_dashboard_data():
     }
 
 class CropRequest(BaseModel):
-    npk: str
-    temp: int
-    humidity: int
-    rainfall: int
+    city: str
+    N: float
+    P: float
+    K: float
+    ph: float
+
+def fetch_real_weather(city: str):
+    api_key = os.getenv("API_KEY")
+    if not api_key:
+        return {"temp": 25, "humidity": 60, "rainfall": 100}
+
+    url = f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric"
+    try:
+        response = requests.get(url, timeout=5)
+        response.raise_for_status()
+        data = response.json()
+        temp = data.get("main", {}).get("temp", 25)
+        humidity = data.get("main", {}).get("humidity", 60)
+        
+        rain_1h = data.get("rain", {}).get("1h", 0)
+        rainfall = rain_1h * 50 if rain_1h > 0 else (100 if humidity > 70 else 40)
+        
+        return {"temp": temp, "humidity": humidity, "rainfall": rainfall}
+    except Exception:
+        return {"temp": 25, "humidity": 60, "rainfall": 100}
 
 @app.post("/crop-recommendation")
 def recommend_crop(req: CropRequest):
+    weather = fetch_real_weather(req.city)
+    
+    if not crop_model:
+        return {"error": "Model not loaded"}
+
+    input_data = pd.DataFrame([{
+        "N": req.N,
+        "P": req.P,
+        "K": req.K,
+        "ph": req.ph,
+        "temperature": weather["temp"],
+        "humidity": weather["humidity"],
+        "rainfall": weather["rainfall"]
+    }])
+
+    probabilities = crop_model.predict_proba(input_data)[0]
+    classes = crop_model.classes_
+    
+    top_indices = np.argsort(probabilities)[::-1][:3]
+    top_crops = [{"crop": classes[i], "confidence": f"{probabilities[i]*100:.1f}%"} for i in top_indices]
+    
     return {
-        "recommended": ["Wheat", "Soybean"],
-        "reason": f"Based on your temperature ({req.temp}°C) and rainfall ({req.rainfall}mm), these crops are highly suitable.",
-        "suitabilityScore": 92
+        "recommended_crop": top_crops[0]["crop"],
+        "top_3_recommendations": top_crops,
+        "weather_used": weather
     }
 
 @app.get("/alerts")
