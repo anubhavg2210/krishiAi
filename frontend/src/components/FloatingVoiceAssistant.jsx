@@ -15,8 +15,8 @@ import {
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAppContext } from "../context/AppContext";
 
-const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
-const GEMINI_MODEL = import.meta.env.VITE_GEMINI_MODEL || "gemini-2.5-flash";
+const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
+const GROQ_MODEL = import.meta.env.VITE_GROQ_MODEL || "llama3-70b-8192";
 
 const PAGE_LABELS = {
   "/": "home",
@@ -90,56 +90,52 @@ function buildContextLine({ pathname, district, weatherData, language }) {
   return `Current page: ${pageLabel}. Selected language: ${language === "hi" ? "Hindi" : "English"}. ${weatherSummary}`;
 }
 
-async function askGeminiAndSpeak(message, context, history, language, onUpdate) {
-  if (!GEMINI_API_KEY) {
-    throw new Error("Gemini API key missing hai.");
+async function askGroqAndSpeak(message, context, history, language, onUpdate) {
+  if (!GROQ_API_KEY) {
+    throw new Error("Groq API key missing hai.");
   }
 
-  const recentHistory = history
-    .slice(-6)
-    .map((item) => `${item.role === "assistant" ? "Assistant" : "User"}: ${item.text}`)
-    .join("\n");
+  const systemPrompt = [
+    "Tum ek behad anubhavi (experienced) desi Kisan ho jo apne kisan bhaiyon ki kheti mein madad karta hai.",
+    language === "hi"
+      ? "Tumhari boli aur aawaz ekdum gaon ke samajhdar kisan jaisi honi chahiye. Shuruat hamesha 'Ram Ram bhai', 'Kisan bhai', ya 'Bhaiya' jaise shabdo se karo. Jawab hamesha theth Hindi ya simple Hinglish me do."
+      : "Reply in clear, practical English with a farmer-friendly tone unless the user asks in Hindi.",
+    "Bohot important: Jawab sawaal ke hisaab se sateek (accurate) aur puri tarah mukammal (complete) hona chahiye. Agar lambi detail chahiye to step-by-step poora samjhao, aur agar chhota sawaal hai to to-the-point jawab do. Par koi bhi sentence aadhura mat chhodna.",
+    "Agar kisan krishi (agriculture), fasal, ya beej ke baare me puche toh apna pura anubhav ek kisan ki tarah saajha karo.",
+    "Diye gaye Context me district aur Live Weather data hai. Mausam ka haal pooche to strictly usi weather data ka use karke batao aur us mausam me kheti ki salah do.",
+    "Kisan ko practical agla step batao aur relevant hone par apne andaz me crop suggestion ya disease detection page ka zikr karo.",
+    `Context: ${context}`
+  ].filter(Boolean).join("\n");
+
+  const messages = [
+    { role: "system", content: systemPrompt },
+    ...history.slice(-6).map(item => ({
+      role: item.role === "assistant" ? "assistant" : "user",
+      content: item.text
+    })),
+    { role: "user", content: message }
+  ];
 
   const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:streamGenerateContent?key=${GEMINI_API_KEY}`,
+    `https://api.groq.com/openai/v1/chat/completions`,
     {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${GROQ_API_KEY}`
+      },
       body: JSON.stringify({
-        contents: [
-          {
-            role: "user",
-            parts: [
-              {
-                text: [
-                  "Tum ek behad anubhavi (experienced) desi Kisan ho jo apne kisan bhaiyon ki kheti mein madad karta hai.",
-                  language === "hi"
-                    ? "Tumhari boli aur aawaz ekdum gaon ke samajhdar kisan jaisi honi chahiye. Shuruat hamesha 'Ram Ram bhai', 'Kisan bhai', ya 'Bhaiya' jaise shabdo se karo. Jawab hamesha theth Hindi ya simple Hinglish me do."
-                    : "Reply in clear, practical English with a farmer-friendly tone unless the user asks in Hindi.",
-                  "Bohot important: Jawab sawaal ke hisaab se sateek (accurate) aur puri tarah mukammal (complete) hona chahiye. Agar lambi detail chahiye to step-by-step poora samjhao, aur agar chhota sawaal hai to to-the-point jawab do. Par koi bhi sentence aadhura mat chhodna.",
-                  "Agar kisan krishi (agriculture), fasal, ya beej ke baare me puche toh apna pura anubhav ek kisan ki tarah saajha karo.",
-                  "Diye gaye Context me district aur Live Weather data hai. Mausam ka haal pooche to strictly usi weather data ka use karke batao aur us mausam me kheti ki salah do.",
-                  "Kisan ko practical agla step batao aur relevant hone par apne andaz me crop suggestion ya disease detection page ka zikr karo.",
-                  `Context: ${context}`,
-                  recentHistory ? `Recent chat:\n${recentHistory}` : "",
-                  `User question: ${message}`,
-                ]
-                  .filter(Boolean)
-                  .join("\n"),
-              },
-            ],
-          },
-        ],
-        generationConfig: {
-          temperature: 0.6,
-          maxOutputTokens: 2048,
-        },
+        model: GROQ_MODEL,
+        messages: messages,
+        temperature: 0.6,
+        max_tokens: 2048,
+        stream: true
       }),
     },
   );
 
   if (!response.ok) {
-    throw new Error("Gemini API error ya quota limit.");
+    throw new Error("Groq API error ya quota limit.");
   }
 
   const reader = response.body.getReader();
@@ -154,32 +150,40 @@ async function askGeminiAndSpeak(message, context, history, language, onUpdate) 
     if (done) break;
     
     const chunk = decoder.decode(value, { stream: true });
+    const lines = chunk.split("\n").filter(line => line.trim() !== "");
     
-    // Extract text from stream chunk safely
-    const regex = /"text":\s*"((?:[^"\\]|\\.)*)"/g;
-    let match;
-    while ((match = regex.exec(chunk)) !== null) {
-       let rawStr = match[1];
-       let parsedStr = rawStr.replace(/\\n/g, '\n').replace(/\\"/g, '"');
-       
-       fullText += parsedStr;
-       buffer += parsedStr;
-       onUpdate(fullText);
+    for (const line of lines) {
+      if (line.replace(/^data: /, "").trim() === "[DONE]") {
+        continue;
+      }
+      if (line.startsWith("data: ")) {
+        try {
+          const parsed = JSON.parse(line.replace(/^data: /, ""));
+          const content = parsed.choices[0]?.delta?.content || "";
+          if (content) {
+            fullText += content;
+            buffer += content;
+            onUpdate(fullText);
 
-       // Dispatch to TTS queue immediately if we hit sentence boundaries
-       if (/[.!?\n]/.test(buffer)) {
-          let parts = buffer.split(/([.!?\n]+)/);
-          while (parts.length > 2) {
-             let sentence = parts.shift();
-             let punct = parts.shift();
-             let combined = (sentence + punct).trim();
-             if (combined) {
-                // Speak the chunk using the browser queue
-                speakText(combined);
-             }
+            // Dispatch to TTS queue immediately if we hit sentence boundaries
+            if (/[.!?\n]/.test(buffer)) {
+              let parts = buffer.split(/([.!?\n]+)/);
+              while (parts.length > 2) {
+                let sentence = parts.shift();
+                let punct = parts.shift();
+                let combined = (sentence + punct).trim();
+                if (combined) {
+                  // Speak the chunk using the browser queue
+                  speakText(combined);
+                }
+              }
+              buffer = parts.join(""); 
+            }
           }
-          buffer = parts.join(""); 
-       }
+        } catch (e) {
+          // Ignore parse errors from incomplete chunks
+        }
+      }
     }
   }
 
@@ -188,7 +192,7 @@ async function askGeminiAndSpeak(message, context, history, language, onUpdate) 
   }
 
   if (!fullText) {
-    throw new Error("Gemini ne empty response diya.");
+    throw new Error("Groq ne empty response diya.");
   }
 
   return fullText;
@@ -394,7 +398,7 @@ function AssistantPanel({ location, district, weatherData, language, t }) {
          const assistantMessageId = `${Date.now()}-assistant`;
          setMessages((current) => [...current, { role: "assistant", text: "", id: assistantMessageId }]);
          
-         await askGeminiAndSpeak(message, contextLine, historyWithUser, language, (partialText) => {
+         await askGroqAndSpeak(message, contextLine, historyWithUser, language, (partialText) => {
             setMessages((current) => 
                current.map((m) => m.id === assistantMessageId ? { ...m, text: partialText } : m)
             );
