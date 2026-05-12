@@ -138,3 +138,56 @@ export const CROP_LIBRARY = [
     details: { seed: "Pusa Vishal, 15kg/ha", npkText: "15:40:20 kg/ha", extraTip: "Fast growing short duration crop.", water: "~40mm / season", irrigationStages: "1-2 irrigations", irrigationTip: "Irrigate before flowering.", yield: "10-15", yieldText: "Qtl/ha", price: "₹7,500" }
   }
 ];
+
+function parseRange(value, fallback = [0, 100]) {
+  const numbers = String(value).match(/\d+(?:\.\d+)?/g)?.map(Number) || [];
+  if (numbers.length >= 2) return [numbers[0], numbers[1]];
+  if (numbers.length === 1) return [numbers[0], numbers[0]];
+  return fallback;
+}
+
+function parseNpk(npkText) {
+  const [n = 50, p = 50, k = 50] = String(npkText).match(/\d+(?:\.\d+)?/g)?.map(Number) || [];
+  return { n, p, k };
+}
+
+function distanceFromRange(value, [min, max]) {
+  if (value == null || Number.isNaN(value)) return 0;
+  if (value < min) return min - value;
+  if (value > max) return value - max;
+  return 0;
+}
+
+function scoreCrop(crop, soilData, weatherData) {
+  const idealNpk = parseNpk(crop.details?.npkText);
+  const tempRange = parseRange(crop.tempRange, [15, 35]);
+  const waterRange = parseRange(crop.waterNeed, [30, 150]);
+
+  let score = 100;
+  score -= Math.abs((soilData?.N ?? idealNpk.n) - idealNpk.n) * 0.12;
+  score -= Math.abs((soilData?.P ?? idealNpk.p) - idealNpk.p) * 0.18;
+  score -= Math.abs((soilData?.K ?? idealNpk.k) - idealNpk.k) * 0.15;
+  score -= Math.abs((soilData?.pH ?? 6.8) - 6.8) * 5;
+  score -= distanceFromRange(weatherData?.temp, tempRange) * 2.5;
+  score -= distanceFromRange(weatherData?.rainfall, waterRange) * 0.08;
+
+  return Math.max(35, Math.min(99, score));
+}
+
+export function buildLocalCropRecommendation(soilData, weatherData) {
+  const weather = weatherData || { temp: 25, humidity: 60, rainfall: 80 };
+  const ranked = CROP_LIBRARY
+    .map((crop) => ({
+      crop: crop.name,
+      confidence: `${scoreCrop(crop, soilData, weather).toFixed(1)}%`,
+    }))
+    .sort((a, b) => parseFloat(b.confidence) - parseFloat(a.confidence))
+    .slice(0, 3);
+
+  return {
+    recommended_crop: ranked[0]?.crop || CROP_LIBRARY[0].name,
+    top_3_recommendations: ranked,
+    weather_used: weather,
+    source: "local-fallback",
+  };
+}

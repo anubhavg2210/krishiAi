@@ -9,7 +9,7 @@ export const translations = {
       home: "Home",
       dashboard: "Dashboard",
       cropAi: "Crop AI",
-      seedAdvisor: "Seed Advisor",
+      seedAdvisor: "Farm Advisor",
       weather: "Weather Condition",
       disease: "Disease Detection",
       assistant: "AI Voice Assistant",
@@ -176,7 +176,7 @@ export const translations = {
       demoBody:
         "This platform helps farmers choose the right seed, avoid scams, and improve yield using AI-driven recommendations.",
       titleA: "Kisan Smart",
-      titleB: "Seed Advisor",
+      titleB: "Farm Advisor",
       subtitle:
         "Get personalized seed recommendations based on your soil, weather, and budget. Avoid fake seeds and maximize your yield.",
       fieldDetails: "Your Field Details",
@@ -194,7 +194,7 @@ export const translations = {
       topPick: "AI Top Pick",
       variety: "Seed Variety",
       buySeed: "Buy This Seed",
-      market: "Seed Market",
+      market: "Farm Inputs",
       rating: "Rating",
       price: "Price",
       yield: "Expected Yield",
@@ -260,7 +260,7 @@ export const translations = {
       home: "होम",
       dashboard: "डैशबोर्ड",
       cropAi: "फसल AI",
-      seedAdvisor: "बीज सलाहकार",
+      seedAdvisor: "फार्म सलाहकार",
       weather: "मौसम स्थिति",
       disease: "रोग पहचान",
       assistant: "AI आवाज सहायक",
@@ -427,7 +427,7 @@ export const translations = {
       demoBody:
         "यह प्लेटफॉर्म किसानों को सही बीज चुनने, धोखाधड़ी से बचने और AI सुझावों से उपज सुधारने में मदद करता है.",
       titleA: "किसान स्मार्ट",
-      titleB: "बीज सलाहकार",
+      titleB: "फार्म सलाहकार",
       subtitle:
         "मिट्टी, मौसम और बजट के आधार पर व्यक्तिगत बीज सुझाव पाएं. नकली बीज से बचें और उपज बढ़ाएं.",
       fieldDetails: "आपके खेत की जानकारी",
@@ -445,7 +445,7 @@ export const translations = {
       topPick: "AI की पहली पसंद",
       variety: "बीज किस्म",
       buySeed: "यह बीज खरीदें",
-      market: "बीज बाजार",
+      market: "फार्म इनपुट",
       rating: "रेटिंग",
       price: "भाव",
       yield: "अनुमानित उपज",
