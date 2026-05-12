@@ -37,9 +37,12 @@ const handleImageError = (e) => {
 
 export default function ResultsPage() {
   const { district, soilData, t } = useAppContext();
+  const location = useLocation();
+  const aiResult = location.state?.aiResult;
+  const isError = location.state?.error || aiResult?.error;
 
-  // If there is no soilData or aiResult, redirect
-  if (!soilData || !aiResult) {
+  // If there is an error or missing data, redirect
+  if (isError || !soilData || !aiResult) {
     return <Navigate to="/suggest" replace />;
   }
 

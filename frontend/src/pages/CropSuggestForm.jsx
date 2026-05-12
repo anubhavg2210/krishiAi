@@ -96,7 +96,8 @@ export default function CropSuggestForm() {
     setSoilData(soil); // Save input to context
     
     try {
-      const response = await fetch("http://localhost:8000/crop-recommendation", {
+      const apiUrl = import.meta.env.VITE_API_URL || "https://krishiai-ynrm.onrender.com";
+      const response = await fetch(`${apiUrl}/crop-recommendation`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
