@@ -8,7 +8,7 @@
 import { ArrowLeft, Save, Share2, TrendingUp, CheckCircle, Sprout, CloudRain, ShieldCheck, ThermometerSun, Leaf, Activity } from "lucide-react";
 import { Link, Navigate, useLocation } from "react-router-dom";
 import { useAppContext } from "../context/AppContext";
-import { CROP_LIBRARY } from "../lib/cropEngine";
+import { buildLocalCropRecommendation, CROP_LIBRARY } from "../lib/cropEngine";
 
 // Dynamic insight generator
 const generateInsight = (cropName, weather, soil) => {
@@ -36,6 +36,7 @@ const handleImageError = (e) => {
 };
 
 export default function ResultsPage() {
+<<<<<<< Updated upstream
   const { district, soilData, t } = useAppContext();
   const location = useLocation();
   const aiResult = location.state?.aiResult;
@@ -43,14 +44,26 @@ export default function ResultsPage() {
 
   // If there is an error or missing data, redirect
   if (isError || !soilData || !aiResult) {
+=======
+  const location = useLocation();
+  const { district, soilData, weatherData, t } = useAppContext();
+  const aiResult = location.state?.aiResult || (soilData ? buildLocalCropRecommendation(soilData, weatherData) : null);
+  const hasFallbackWarning = location.state?.warning === "backend_unavailable" || aiResult?.source === "local-fallback";
+
+  // If there is no soilData, the user didn't submit the form. Redirect them.
+  if (!soilData || !aiResult) {
+>>>>>>> Stashed changes
     return <Navigate to="/suggest" replace />;
   }
 
-  const recommendedName = aiResult.recommended_crop.toLowerCase();
+  const recommendedName = String(aiResult.recommended_crop || "").toLowerCase();
   let crop = CROP_LIBRARY.find(c => c.name.toLowerCase() === recommendedName) || CROP_LIBRARY[0];
   
-  const topConfidenceStr = aiResult.top_3_recommendations[0]?.confidence || "90%";
-  crop = { ...crop, matchScore: topConfidenceStr };
+  const recommendations = aiResult.top_3_recommendations?.length
+    ? aiResult.top_3_recommendations
+    : buildLocalCropRecommendation(soilData, weatherData).top_3_recommendations;
+  const topConfidence = parseFloat(recommendations[0]?.confidence) || 90;
+  crop = { ...crop, matchScore: topConfidence.toFixed(1) };
 
   const dynamicInsight = generateInsight(crop.name, aiResult.weather_used, soilData);
 
@@ -78,6 +91,11 @@ export default function ResultsPage() {
 
       {/* Main Results Grid */}
       <div className="bg-white rounded-[2rem] shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden mb-8">
+        {hasFallbackWarning && (
+          <div className="border-b border-amber-200 bg-amber-50 px-6 py-4 text-sm font-semibold text-amber-800">
+            Backend recommendation service was unavailable, so this result was generated locally from your NPK and weather values.
+          </div>
+        )}
         
         {/* Banner */}
         <div className="relative h-72 md:h-96 w-full overflow-hidden group">
@@ -193,7 +211,7 @@ export default function ResultsPage() {
            <Sprout className="text-[#4CAF50]"/> Alternate AI Suggestions
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {aiResult.top_3_recommendations.slice(1).map((rec, idx) => {
+          {recommendations.slice(1).map((rec, idx) => {
             const recInfo = CROP_LIBRARY.find(c => c.name.toLowerCase() === rec.crop.toLowerCase()) || CROP_LIBRARY[0];
             return (
               <div key={idx} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col items-start gap-5 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer group">

@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { useAppContext } from "../context/AppContext";
 import { fetchWeatherForDistrict } from "../lib/weatherService";
+import { buildLocalCropRecommendation } from "../lib/cropEngine";
 
 const MP_DISTRICTS = [
   "Indore", "Sehore", "Vidisha", "Raisen", "Shivpuri",
@@ -95,8 +96,13 @@ export default function CropSuggestForm() {
     setLoading(true);
     setSoilData(soil); // Save input to context
     
+    const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
+
     try {
+<<<<<<< Updated upstream
       const apiUrl = import.meta.env.VITE_API_URL || "https://krishiai-ynrm.onrender.com";
+=======
+>>>>>>> Stashed changes
       const response = await fetch(`${apiUrl}/crop-recommendation`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -108,11 +114,21 @@ export default function CropSuggestForm() {
           ph: soil.pH
         })
       });
+
+      if (!response.ok) {
+        throw new Error(`CROP_RECOMMENDATION_${response.status}`);
+      }
+
       const data = await response.json();
+      if (data?.error || !data?.recommended_crop) {
+        throw new Error(data?.error || "INVALID_CROP_RECOMMENDATION_RESPONSE");
+      }
+
       navigate("/results", { state: { aiResult: data } });
     } catch (error) {
       console.error("Error fetching recommendation:", error);
-      navigate("/results", { state: { error: true } });
+      const fallbackResult = buildLocalCropRecommendation(soil, weather);
+      navigate("/results", { state: { aiResult: fallbackResult, warning: "backend_unavailable" } });
     } finally {
       setLoading(false);
     }
