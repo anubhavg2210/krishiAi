@@ -75,7 +75,7 @@ export default function DiseasePage() {
     setError("");
 
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || "https://krishiai-ynrm.onrender.com";
+      const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
       const res = await fetch(`${apiUrl}/analyze`, {
         method: "POST",
         body: formData,
