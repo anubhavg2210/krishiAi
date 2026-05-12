@@ -326,6 +326,7 @@ function AssistantPanel({ location, district, weatherData, language, t }) {
     recognition.continuous = false;
 
     recognition.onstart = () => {
+      console.log("Mic started listening...");
       setHeardText("");
       setError("");
     };
@@ -335,17 +336,21 @@ function AssistantPanel({ location, district, weatherData, language, t }) {
         .map((result) => result?.[0]?.transcript || "")
         .join(" ")
         .trim();
+        
+      console.log("Heard:", transcript);
 
       setHeardText(transcript);
       setQuery(transcript);
 
       const isFinal = Array.from(event.results || []).some((result) => result.isFinal);
       if (isFinal && transcript) {
+        console.log("Final transcript captured, submitting:", transcript);
         await handleAsk(transcript);
       }
     };
 
     recognition.onerror = (event) => {
+      console.error("Mic error:", event.error);
       setIsListening(false);
       if (event.error === "no-speech") {
         setError("Aapne kuch bola nahi. Kripya dobara mic dabayein aur bolein.");
@@ -359,6 +364,7 @@ function AssistantPanel({ location, district, weatherData, language, t }) {
     };
 
     recognition.onend = () => {
+      console.log("Mic stopped listening.");
       setIsListening(false);
     };
 
@@ -366,9 +372,7 @@ function AssistantPanel({ location, district, weatherData, language, t }) {
 
     return () => {
       recognition.stop();
-      if (window.speechSynthesis) {
-        window.speechSynthesis.cancel();
-      }
+      // Removed window.speechSynthesis.cancel() from here as it was killing the assistant's voice mid-sentence!
     };
   }, [SpeechRecognition, contextLine, district, location.pathname, messages]);
 
