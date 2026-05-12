@@ -334,7 +334,7 @@ class CropRequest(BaseModel):
 def fetch_real_weather(city: str):
     api_key = os.getenv("API_KEY")
     if not api_key:
-        return {"temp": 25, "humidity": 60, "rainfall": 100}
+        return {"temp": 22, "humidity": 60, "rainfall": 60}
 
     url = f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric"
     try:
@@ -349,7 +349,42 @@ def fetch_real_weather(city: str):
         
         return {"temp": temp, "humidity": humidity, "rainfall": rainfall}
     except Exception:
-        return {"temp": 25, "humidity": 60, "rainfall": 100}
+        return {"temp": 22, "humidity": 60, "rainfall": 60}
+
+CROPS_IDEAL_RANGES = {
+    "Rice": {"N": (80, 120), "P": (40, 60), "K": (40, 60), "ph": (5.5, 6.5)},
+    "Maize": {"N": (100, 140), "P": (50, 70), "K": (40, 60), "ph": (6.0, 7.0)},
+    "Cotton": {"N": (100, 150), "P": (40, 60), "K": (40, 60), "ph": (6.0, 7.5)},
+    "Soybean": {"N": (20, 50), "P": (60, 80), "K": (40, 60), "ph": (6.0, 7.0)},
+    "Groundnut": {"N": (20, 40), "P": (50, 70), "K": (30, 50), "ph": (6.0, 7.5)},
+    "Bajra": {"N": (40, 60), "P": (20, 40), "K": (20, 40), "ph": (6.0, 8.0)},
+    "Jowar": {"N": (60, 80), "P": (30, 50), "K": (30, 50), "ph": (6.0, 8.0)},
+    "Wheat": {"N": (80, 120), "P": (40, 60), "K": (30, 50), "ph": (6.0, 7.5)},
+    "Gram": {"N": (15, 35), "P": (40, 60), "K": (20, 40), "ph": (6.0, 7.5)},
+    "Mustard": {"N": (60, 100), "P": (30, 50), "K": (20, 40), "ph": (5.5, 7.5)},
+    "Peas": {"N": (20, 40), "P": (40, 60), "K": (20, 40), "ph": (6.0, 7.5)},
+    "Barley": {"N": (60, 80), "P": (30, 50), "K": (20, 40), "ph": (6.0, 8.0)},
+    "Watermelon": {"N": (80, 100), "P": (40, 60), "K": (40, 60), "ph": (6.0, 7.0)},
+    "Muskmelon": {"N": (80, 100), "P": (40, 60), "K": (40, 60), "ph": (6.0, 7.0)},
+    "Cucumber": {"N": (80, 100), "P": (40, 60), "K": (40, 60), "ph": (6.0, 7.5)},
+    "Tomato": {"N": (100, 120), "P": (60, 80), "K": (60, 80), "ph": (6.0, 7.0)},
+    "Onion": {"N": (80, 100), "P": (40, 60), "K": (40, 60), "ph": (6.0, 7.0)},
+    "Sunflower": {"N": (60, 80), "P": (40, 60), "K": (30, 50), "ph": (6.0, 7.5)},
+    "Moong": {"N": (10, 20), "P": (30, 50), "K": (20, 30), "ph": (6.0, 7.5)}
+}
+
+def calculate_param_score(value, ideal_min, ideal_max):
+    if ideal_min <= value <= ideal_max:
+        return 1.0
+
+    distance = min(
+        abs(value - ideal_min),
+        abs(value - ideal_max)
+    )
+
+    tolerance = (ideal_max - ideal_min) + 20
+    score = max(0.0, 1 - (distance / tolerance))
+    return round(score, 2)
 
 @app.post("/crop-recommendation")
 def recommend_crop(req: CropRequest):
@@ -369,14 +404,62 @@ def recommend_crop(req: CropRequest):
     }])
 
     probabilities = crop_model.predict_proba(input_data)[0]
-    classes = crop_model.classes_
     
-    top_indices = np.argsort(probabilities)[::-1][:3]
-    top_crops = [{"crop": classes[i], "confidence": f"{probabilities[i]*100:.1f}%"} for i in top_indices]
-    
+    crop_scores = []
+    for idx, crop_name in enumerate(crop_model.classes_):
+        base_probability = float(probabilities[idx])
+
+        if crop_name not in CROPS_IDEAL_RANGES:
+            continue
+
+        ideal = CROPS_IDEAL_RANGES[crop_name]
+
+        n_score = calculate_param_score(req.N, ideal["N"][0], ideal["N"][1])
+        p_score = calculate_param_score(req.P, ideal["P"][0], ideal["P"][1])
+        k_score = calculate_param_score(req.K, ideal["K"][0], ideal["K"][1])
+        ph_score = calculate_param_score(req.ph, ideal["ph"][0], ideal["ph"][1])
+
+        npk_score = (n_score + p_score + k_score + ph_score) / 4
+
+        # 60% soil priority
+        # 40% weather/model priority
+        final_score = (npk_score * 0.60) + (base_probability * 0.40)
+
+        reasons = []
+        if n_score >= 0.9:
+            reasons.append("Excellent Nitrogen compatibility")
+        if p_score >= 0.9:
+            reasons.append("Excellent Phosphorus compatibility")
+        if k_score >= 0.9:
+            reasons.append("Excellent Potassium compatibility")
+        if ph_score >= 0.9:
+            reasons.append("Excellent pH compatibility")
+
+        if not reasons:
+            reasons.append("Good overall soil compatibility")
+
+        recommended_reason = ", ".join(reasons[:2])
+
+        crop_scores.append({
+            "crop": crop_name,
+            "confidence": f"{round(final_score * 100, 1)}%",
+            "smart_insight": (
+                f"Your soil profile strongly supports {crop_name} cultivation "
+                f"with favorable nutrient compatibility."
+            ),
+            "soil_match": f"{round(npk_score * 100)}%",
+            "weather_match": f"{round(base_probability * 100)}%",
+            "recommended_reason": recommended_reason,
+            "final_score": round(final_score, 4)
+        })
+
+    crop_scores = sorted(crop_scores, key=lambda x: x["final_score"], reverse=True)
+    top_3_recommendations = crop_scores[:3]
+
     return {
-        "recommended_crop": top_crops[0]["crop"],
-        "top_3_recommendations": top_crops,
+        "recommended_crop": top_3_recommendations[0]["crop"] if top_3_recommendations else "Wheat",
+        "top_3_recommendations": top_3_recommendations,
+        "recommendations": top_3_recommendations,
         "weather_used": weather
     }
 
