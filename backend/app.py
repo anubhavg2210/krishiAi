@@ -402,15 +402,19 @@ async def groq_chat_proxy(req: Request):
     if not auth_header:
         raise HTTPException(status_code=401, detail="Authorization header missing")
 
+    r = requests.post(
+        "https://api.groq.com/openai/v1/chat/completions",
+        json=body,
+        headers={"Authorization": auth_header, "Content-Type": "application/json"},
+        stream=True
+    )
+    if r.status_code != 200:
+        raise HTTPException(status_code=r.status_code, detail=r.text)
+
     def stream_generator():
-        with requests.post(
-            "https://api.groq.com/openai/v1/chat/completions",
-            json=body,
-            headers={"Authorization": auth_header, "Content-Type": "application/json"},
-            stream=True
-        ) as r:
-            for chunk in r.iter_content(chunk_size=1024):
-                if chunk:
-                    yield chunk
+        for chunk in r.iter_content(chunk_size=1024):
+            if chunk:
+                yield chunk
 
     return StreamingResponse(stream_generator(), media_type="text/event-stream")
+
