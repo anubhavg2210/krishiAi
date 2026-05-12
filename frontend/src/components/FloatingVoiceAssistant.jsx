@@ -280,13 +280,11 @@ function AssistantPanel({ location, district, weatherData, language, t }) {
   ]);
 
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const [isPaused, setIsPaused] = useState(false);
 
   useEffect(() => {
     const interval = setInterval(() => {
       if (typeof window !== "undefined" && window.speechSynthesis) {
         setIsSpeaking(window.speechSynthesis.speaking);
-        setIsPaused(window.speechSynthesis.paused);
       }
     }, 500);
     return () => clearInterval(interval);
@@ -604,22 +602,20 @@ function AssistantPanel({ location, district, weatherData, language, t }) {
             <button
               type="button"
               onClick={() => {
-                if (isSpeaking && !isPaused) {
-                  window.speechSynthesis.pause();
-                } else if (isPaused) {
-                  window.speechSynthesis.resume();
+                if (isSpeaking) {
+                  stopSpeaking();
                 } else {
                   speakText(latestAssistantReply);
                 }
               }}
               className={`flex h-[3.25rem] w-[3.25rem] shrink-0 items-center justify-center rounded-full border transition-all shadow-sm ${
-                isSpeaking && !isPaused
+                isSpeaking
                   ? "border-amber-400 bg-amber-50 text-amber-600 hover:bg-amber-100"
                   : "border-white/60 bg-white/80 text-slate-600 hover:bg-white hover:text-[#1a4a38]"
               } hover:-translate-y-0.5 hover:shadow-md`}
               aria-label={t("assistant.speakLatest")}
             >
-              {isSpeaking && !isPaused ? <Pause size={20} /> : isPaused ? <Play size={20} /> : <Volume2 size={20} />}
+              {isSpeaking ? <Pause size={20} /> : <Volume2 size={20} />}
             </button>
 
             <button
