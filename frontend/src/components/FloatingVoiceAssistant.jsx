@@ -10,7 +10,9 @@ import {
   Sparkles,
   Sprout,
   Volume2,
-  Bot
+  Bot,
+  Play,
+  Pause
 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAppContext } from "../context/AppContext";
@@ -276,6 +278,19 @@ function AssistantPanel({ location, district, weatherData, language, t }) {
   const [messages, setMessages] = useState([
     createAssistantMessage(t("assistant.welcome")),
   ]);
+
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (typeof window !== "undefined" && window.speechSynthesis) {
+        setIsSpeaking(window.speechSynthesis.speaking);
+        setIsPaused(window.speechSynthesis.paused);
+      }
+    }, 500);
+    return () => clearInterval(interval);
+  }, []);
 
   const contextLine = useMemo(
     () =>
@@ -588,11 +603,23 @@ function AssistantPanel({ location, district, weatherData, language, t }) {
             
             <button
               type="button"
-              onClick={() => speakText(latestAssistantReply)}
-              className="flex h-[3.25rem] w-[3.25rem] shrink-0 items-center justify-center rounded-full border border-white/60 bg-white/80 text-slate-600 shadow-sm transition-all hover:-translate-y-0.5 hover:bg-white hover:text-[#1a4a38] hover:shadow-md"
+              onClick={() => {
+                if (isSpeaking && !isPaused) {
+                  window.speechSynthesis.pause();
+                } else if (isPaused) {
+                  window.speechSynthesis.resume();
+                } else {
+                  speakText(latestAssistantReply);
+                }
+              }}
+              className={`flex h-[3.25rem] w-[3.25rem] shrink-0 items-center justify-center rounded-full border transition-all shadow-sm ${
+                isSpeaking && !isPaused
+                  ? "border-amber-400 bg-amber-50 text-amber-600 hover:bg-amber-100"
+                  : "border-white/60 bg-white/80 text-slate-600 hover:bg-white hover:text-[#1a4a38]"
+              } hover:-translate-y-0.5 hover:shadow-md`}
               aria-label={t("assistant.speakLatest")}
             >
-              <Volume2 size={20} />
+              {isSpeaking && !isPaused ? <Pause size={20} /> : isPaused ? <Play size={20} /> : <Volume2 size={20} />}
             </button>
 
             <button
