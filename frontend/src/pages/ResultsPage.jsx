@@ -36,15 +36,6 @@ const handleImageError = (e) => {
 };
 
 export default function ResultsPage() {
-<<<<<<< Updated upstream
-  const { district, soilData, t } = useAppContext();
-  const location = useLocation();
-  const aiResult = location.state?.aiResult;
-  const isError = location.state?.error || aiResult?.error;
-
-  // If there is an error or missing data, redirect
-  if (isError || !soilData || !aiResult) {
-=======
   const location = useLocation();
   const { district, soilData, weatherData, t } = useAppContext();
   const aiResult = location.state?.aiResult || (soilData ? buildLocalCropRecommendation(soilData, weatherData) : null);
@@ -52,7 +43,6 @@ export default function ResultsPage() {
 
   // If there is no soilData, the user didn't submit the form. Redirect them.
   if (!soilData || !aiResult) {
->>>>>>> Stashed changes
     return <Navigate to="/suggest" replace />;
   }
 

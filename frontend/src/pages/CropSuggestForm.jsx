@@ -99,10 +99,6 @@ export default function CropSuggestForm() {
     const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
     try {
-<<<<<<< Updated upstream
-      const apiUrl = import.meta.env.VITE_API_URL || "https://krishiai-ynrm.onrender.com";
-=======
->>>>>>> Stashed changes
       const response = await fetch(`${apiUrl}/crop-recommendation`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
