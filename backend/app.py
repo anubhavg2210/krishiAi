@@ -3,8 +3,9 @@ import os
 import requests
 from dotenv import load_dotenv
 from services.plant_check import is_plant
-from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi import FastAPI, File, HTTPException, UploadFile, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 
 from PIL import Image
 import numpy as np
@@ -393,3 +394,23 @@ def get_alerts():
         {"id": 2, "type": "Disease", "title": "High Humidity Warning", "message": "Conditions favorable for early blight. Monitor crops closely."}
     ]
 
+@app.post("/api/groq-chat")
+async def groq_chat_proxy(req: Request):
+    body = await req.json()
+    auth_header = req.headers.get("Authorization")
+    
+    if not auth_header:
+        raise HTTPException(status_code=401, detail="Authorization header missing")
+
+    def stream_generator():
+        with requests.post(
+            "https://api.groq.com/openai/v1/chat/completions",
+            json=body,
+            headers={"Authorization": auth_header, "Content-Type": "application/json"},
+            stream=True
+        ) as r:
+            for chunk in r.iter_content(chunk_size=1024):
+                if chunk:
+                    yield chunk
+
+    return StreamingResponse(stream_generator(), media_type="text/event-stream")

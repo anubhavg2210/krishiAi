@@ -114,8 +114,9 @@ async function askGroqAndSpeak(message, context, history, language, onUpdate) {
     { role: "user", content: message }
   ];
 
+  const backendUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
   const response = await fetch(
-    `https://api.groq.com/openai/v1/chat/completions`,
+    `${backendUrl}/api/groq-chat`,
     {
       method: "POST",
       headers: {
