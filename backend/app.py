@@ -211,33 +211,26 @@ def is_plant_image(file):
         img_array = preprocess_input(img_array)
 
         predictions = model.predict(img_array)
-        decoded = decode_predictions(predictions, top=3)[0]
+        decoded = decode_predictions(predictions, top=5)[0]
 
         print("Plant check:", decoded)
 
         plant_keywords = [
-            "plant", "leaf", "tree", "flower", "fungus",
-            "cabbage", "pepper", "potato", "tomato",
-            "corn", "wheat", "grass", "herb", "fruit", "vegetable"
+            "plant", "leaf", "tree", "flower", "fungus", "moss", "fern",
+            "cabbage", "pepper", "potato", "tomato", "squash", "cucumber",
+            "corn", "wheat", "grass", "herb", "fruit", "vegetable",
+            "pot", "daisy", "vine", "crop", "seed", "sprout", "garden", "greenhouse",
+            "agriculture", "farming", "lemon", "apple", "orange", "banana",
+            "strawberry", "pineapple", "fig", "pomegranate", "acorn", "broccoli", "cauliflower"
         ]
 
-        #  primary check
+        # Check top 5 predictions for any plant related keyword
         for _, label, confidence in decoded:
             label = label.lower()
-            if confidence > 0.2 and any(keyword in label for keyword in plant_keywords):
+            if any(keyword in label for keyword in plant_keywords):
                 return True
 
-        #  fallback 
-        top_label = decoded[0][1].lower()
-        top_conf = decoded[0][2]
-
-        non_plant_keywords = ["person", "face", "car", "dog", "cat"]
-
-        if any(word in top_label for word in non_plant_keywords):
-             return False
-
-        if top_conf < 0.45:
-            return True
+        # If no plant keyword was found in top 5 predictions, it's not a plant
         return False
 
     except Exception as e:
