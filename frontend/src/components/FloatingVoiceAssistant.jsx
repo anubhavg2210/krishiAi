@@ -25,14 +25,15 @@ const PAGE_LABELS = {
   "/suggest": "crop recommendation",
   "/results": "results",
   "/weather": "weather",
-  "/disease": "disease detection",
+  "/farm-health": "farm health dashboard",
+  "/disease": "farm health dashboard",
   "/assistant": "voice assistant",
 };
 
 const QUICK_ACTIONS = [
   { labelKey: "assistant.checkWeather", icon: CloudSun, route: "/weather", reply: "Weather page opened." },
   { labelKey: "assistant.cropSuggestion", icon: Sprout, route: "/suggest", reply: "Crop recommendation page opened." },
-  { labelKey: "assistant.diseaseDetection", icon: Sparkles, route: "/disease", reply: "Disease detection page opened." },
+  { labelKey: "assistant.farmHealth", icon: Sparkles, route: "/farm-health", reply: "Farm Health page opened." },
 ];
 
 function getSpeechRecognition() {
@@ -103,7 +104,7 @@ async function askGroqAndSpeak(message, context, history, language, onUpdate) {
     "Important: Your answer must be accurate and complete. If a long detail is needed, explain step-by-step. Do not leave sentences incomplete.",
     "If the farmer asks about agriculture, crops, or seeds, share your experience like a real farmer.",
     "The Context below provides the district and Live Weather data. If asked about the weather, strictly use this data to give farming advice.",
-    "Suggest practical next steps to the farmer, and mention the crop suggestion or disease detection pages if relevant.",
+    "Suggest practical next steps to the farmer, and mention the crop suggestion or Farm Health pages if relevant.",
     `Context: ${context}`
   ].filter(Boolean).join("\n");
 
@@ -203,7 +204,8 @@ function getIntent(message) {
   const value = message.toLowerCase();
 
   if (/(mausam|weather|barish|temperature|humid|rain)/.test(value)) return "weather";
-  if (/(disease|bimari|rog|leaf|patta|photo|image|analyze)/.test(value)) return "disease";
+  if (/(disease|bimari|rog|leaf|patta|photo|image|analyze|farm health|crop health|kira|keede|weed)/.test(value))
+    return "farmHealth";
   if (/(crop|fasal|suggest|recommend|beej|soil|npk|ph)/.test(value)) return "suggest";
   if (/(result|plan|yield|mandi|price)/.test(value)) return "results";
   if (/(assistant|voice|awaaz)/.test(value)) return "assistant";
@@ -220,8 +222,8 @@ function resolveLocalAction(message, navigate, district, pathname) {
     const route =
       intent === "weather"
         ? "/weather"
-        : intent === "disease"
-          ? "/disease"
+        : intent === "farmHealth"
+          ? "/farm-health"
           : intent === "suggest"
             ? "/suggest"
             : intent === "results"
@@ -234,7 +236,7 @@ function resolveLocalAction(message, navigate, district, pathname) {
 
     const labels = {
       "/weather": "Weather page",
-      "/disease": "Disease detection page",
+      "/farm-health": "Farm Health page",
       "/suggest": "Crop recommendation page",
       "/results": "Results page",
       "/assistant": "Voice assistant page",
@@ -245,7 +247,7 @@ function resolveLocalAction(message, navigate, district, pathname) {
   }
 
   if (/tum kya kar sakte ho|help|madad|kaise use karu/.test(value)) {
-    return `Main mausam samjha sakta hoon, crop suggestion page tak le ja sakta hoon, disease detection guide kar sakta hoon, aur ${district} context ke saath short advice de sakta hoon.`;
+    return `Main mausam samjha sakta hoon, crop suggestion page tak le ja sakta hoon, Farm Health guide kar sakta hoon, aur ${district} context ke saath short advice de sakta hoon.`;
   }
 
   if (/mera district|current district|kaunsa district/.test(value)) {

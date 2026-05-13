@@ -147,8 +147,8 @@ export default function DashboardPage() {
                             <button onClick={() => window.location.href = "/timeline"} className="w-full bg-gray-50 hover:bg-[#4CAF50] hover:text-white text-gray-700 font-bold py-3 px-4 rounded-xl transition-colors border border-gray-200 hover:border-[#4CAF50] text-left flex justify-between items-center">
                                 {t("dashboard.timeline")} <span>→</span>
                             </button>
-                            <button onClick={() => window.location.href = "/disease"} className="w-full bg-gray-50 hover:bg-[#4CAF50] hover:text-white text-gray-700 font-bold py-3 px-4 rounded-xl transition-colors border border-gray-200 hover:border-[#4CAF50] text-left flex justify-between items-center">
-                                {t("dashboard.diseaseScan")} <span>→</span>
+                            <button onClick={() => window.location.href = "/farm-health"} className="w-full bg-gray-50 hover:bg-[#4CAF50] hover:text-white text-gray-700 font-bold py-3 px-4 rounded-xl transition-colors border border-gray-200 hover:border-[#4CAF50] text-left flex justify-between items-center">
+                                {t("dashboard.farmHealthScan")} <span>→</span>
                             </button>
                         </div>
                     </div>

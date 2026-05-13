@@ -38,10 +38,21 @@ const handleImageError = (e) => {
 export default function ResultsPage() {
   const location = useLocation();
   const { district, soilData, weatherData, t } = useAppContext();
-  const aiResult = location.state?.aiResult || (soilData ? buildLocalCropRecommendation(soilData, weatherData) : null);
-  const hasFallbackWarning = location.state?.warning === "backend_unavailable" || aiResult?.source === "local-fallback";
+  const stateResult = location.state?.aiResult;
+  const stateError = location.state?.error || stateResult?.error;
 
-  // If there is no soilData, the user didn't submit the form. Redirect them.
+  const aiResult =
+    stateResult && !stateResult.error
+      ? stateResult
+      : soilData
+        ? buildLocalCropRecommendation(soilData, weatherData)
+        : null;
+
+  const hasFallbackWarning =
+    Boolean(stateError) ||
+    location.state?.warning === "backend_unavailable" ||
+    aiResult?.source === "local-fallback";
+
   if (!soilData || !aiResult) {
     return <Navigate to="/suggest" replace />;
   }

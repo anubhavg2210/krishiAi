@@ -11,7 +11,7 @@ const NAV_LINKS = [
   { labelKey: "nav.cropAi", path: "/suggest" },
   { labelKey: "nav.seedAdvisor", path: "/seed-advisor" },
   { labelKey: "nav.weather", path: "/weather" },
-  { labelKey: "nav.disease", path: "/disease" },
+  { labelKey: "nav.farmHealth", path: "/farm-health" },
   // { name: "Smart Timeline", path: "/timeline" },
   { labelKey: "nav.assistant", path: "/assistant" },
 ];

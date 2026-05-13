@@ -16,10 +16,10 @@ const featureConfig = [
     icons: [Leaf, Droplets, LineChart],
   },
   {
-    id: 'disease',
-    textKey: 'landing.features.disease',
+    id: 'farmHealth',
+    textKey: 'landing.features.farmHealth',
     bgImage: "https://images.unsplash.com/photo-1558350315-8aa00e8e4590?q=80&w=2000&auto=format&fit=crop",
-    primaryLink: '/disease',
+    primaryLink: '/farm-health',
     icons: [ShieldCheck, Activity, CloudSun],
   },
   {

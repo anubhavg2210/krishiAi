@@ -5,7 +5,7 @@
  * This file is responsible for setting up the main layout (Navbar, Footer, FloatingVoiceAssistant)
  * and configuring the URL routes to render different pages (Landing, Form, Results).
  */
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import Navbar from "./components/layout/Navbar";
 import Footer from "./components/layout/Footer";
 import FloatingVoiceAssistant from "./components/FloatingVoiceAssistant";
@@ -13,7 +13,7 @@ import LandingPage from "./pages/LandingPage";
 import CropSuggestForm from "./pages/CropSuggestForm";
 import ResultsPage from "./pages/ResultsPage";
 import WeatherPage from "./pages/WeatherPage";
-import DiseasePage from "./pages/DiseasePage";
+import FarmHealthPage from "./pages/FarmHealthPage";
 import VoiceAssistantPage from "./pages/VoiceAssistantPage";
 import TimelinePage from "./pages/TimelinePage";
 import SeedAdvisorPage from "./pages/SeedAdvisorPage";
@@ -38,7 +38,8 @@ function App() {
           <Route path="/suggest" element={<CropSuggestForm />} />
           <Route path="/results" element={<ResultsPage />} />
           <Route path="/weather" element={<WeatherPage />} />
-          <Route path="/disease" element={<DiseasePage />} />
+          <Route path="/farm-health" element={<FarmHealthPage />} />
+          <Route path="/disease" element={<Navigate to="/farm-health" replace />} />
           <Route path="/assistant" element={<VoiceAssistantPage />} />
           <Route path="/seed-advisor" element={<SeedAdvisorPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
