@@ -95,11 +95,10 @@ export default function CropSuggestForm() {
     e.preventDefault();
     setLoading(true);
     setSoilData(soil); // Save input to context
-    
+
     const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || "https://krishiai-ynrm.onrender.com";
       const response = await fetch(`${apiUrl}/crop-recommendation`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -299,9 +298,9 @@ export default function CropSuggestForm() {
 
           <form onSubmit={handleSubmit} className="space-y-10">
             <div className="space-y-8">
-              <SliderField label={t("cropForm.nitrogen")}   field="N"   min={0}   max={150} unit="kg/ha" accentColor="#4CAF50" />
-              <SliderField label={t("cropForm.phosphorus")} field="P"   min={0}   max={100} unit="kg/ha" accentColor="#4CAF50" />
-              <SliderField label={t("cropForm.potassium")}  field="K"   min={0}   max={100} unit="kg/ha" accentColor="#4CAF50" />
+              <SliderField label={t("cropForm.nitrogen")} field="N" min={0} max={150} unit="kg/ha" accentColor="#4CAF50" />
+              <SliderField label={t("cropForm.phosphorus")} field="P" min={0} max={100} unit="kg/ha" accentColor="#4CAF50" />
+              <SliderField label={t("cropForm.potassium")} field="K" min={0} max={100} unit="kg/ha" accentColor="#4CAF50" />
 
               <div className="bg-gray-50 p-6 rounded-xl border border-gray-100">
                 <SliderField label={t("cropForm.phLevel")} field="pH" min={4} max={9} step={0.1} unit="" accentColor="#2196F3" />

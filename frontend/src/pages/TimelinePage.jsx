@@ -22,7 +22,8 @@ export default function TimelinePage() {
         };
 
         try {
-            const res = await fetch("https://krishiai-ynrm.onrender.com/smart-timeline", {
+            const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
+            const res = await fetch(`${apiUrl}/smart-timeline`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload),
